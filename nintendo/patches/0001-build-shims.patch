@@ -1,0 +1,454 @@
+--- a/Source/WTF/config.h
++++ b/Source/WTF/config.h
+@@ -23,6 +23,7 @@
+ #include "cmakeconfig.h"
+ #endif
+ 
++#include <wtf/wkcshim.h>
+ #include <wtf/ExportMacros.h>
+ 
+ #ifdef __cplusplus
+--- a/Source/WTF/wtf/CMakeLists.txt
++++ b/Source/WTF/wtf/CMakeLists.txt
+@@ -1,5 +1,6 @@
+ set(WTF_PUBLIC_HEADERS
+     ASCIICType.h
++    wkcshim.h
+     AggregateLogger.h
+     Algorithms.h
+     AnsiColors.h
+--- a/Source/WTF/wtf/StdLibExtras.h
++++ b/Source/WTF/wtf/StdLibExtras.h
+@@ -27,6 +27,8 @@
+ #pragma once
+ 
+ #include <cstring>
++#include <iterator>
++#include <utility>
+ #include <memory>
+ #include <type_traits>
+ #include <variant>
+--- a/Source/WTF/wtf/text/IntegerToStringConversion.h
++++ b/Source/WTF/wtf/text/IntegerToStringConversion.h
+@@ -21,6 +21,7 @@
+ 
+ #pragma once
+ 
++#include <iterator>
+ #include <string>
+ #include <wtf/text/LChar.h>
+ 
+--- a/Source/WTF/wtf/wkcshim.h
++++ b/Source/WTF/wtf/wkcshim.h
+@@ -0,0 +1,17 @@
++#pragma once
++// Compatibility shim for the ACCESS/WKC source drop.
++//
++// The fork calls WKCStd::once_flag / WKCStd::call_once in code paths that are
++// not guarded by PLATFORM(WKC) (Assertions.cpp, DataLog.cpp, Language.cpp,
++// Logger.cpp, StackShotProfiler.h, WasmSignature.h, ...). In a real WKC build
++// that namespace comes from the WKC SDK prefix header. Outside a WKC build it
++// is just std. C translation units include the same config.h, so the body is
++// C++-only.
++#ifdef __cplusplus
++#include <mutex>
++
++namespace WKCStd {
++using std::once_flag;
++using std::call_once;
++}
++#endif
+--- a/Source/WTF/wtf/text/TextBreakIterator.cpp
++++ b/Source/WTF/wtf/text/TextBreakIterator.cpp
+@@ -29,17 +29,13 @@
+ #include <atomic>
+ #include <unicode/ubrk.h>
+ 
+-#if defined(WKC_USE_ICU)
+-#include "Options.h"
+-#endif
+-
+ namespace WTF {
+ 
+ TextBreakIteratorCache& TextBreakIteratorCache::singleton()
+ {
+     static LazyNeverDestroyed<TextBreakIteratorCache> cache;
+-    static WKCStd::once_flag onceKey;
+-    WKCStd::call_once(onceKey, [&] {
++    static std::once_flag onceKey;
++    std::call_once(onceKey, [&] {
+         cache.construct();
+     });
+     return cache.get();
+@@ -167,82 +163,40 @@
+ 
+ UBreakIterator* wordBreakIterator(StringView string)
+ {
+-#ifdef WKC_USE_ICU
+-    if (!JSC::Options::useIntl())
+-        return wordBreakIteratorWKC(string);
+-
+-#if !PLATFORM(WKC)
+     static UBreakIterator* staticWordBreakIterator = initializeIterator(UBRK_WORD);
+-#else
+-    WKC_DEFINE_STATIC_TYPE(UBreakIterator*, staticWordBreakIterator, initializeIterator(UBRK_WORD));
+-#endif
+     if (!staticWordBreakIterator)
+         return nullptr;
+ 
+     return setTextForIterator(*staticWordBreakIterator, string);
+-#else
+-    return wordBreakIteratorWKC(string);
+-#endif
+ }
+ 
+ UBreakIterator* sentenceBreakIterator(StringView string)
+ {
+-#ifdef WKC_USE_ICU
+-    if (!JSC::Options::useIntl())
+-        return sentenceBreakIteratorWKC(string);
+-
+-#if !PLATFORM(WKC)
+     static UBreakIterator* staticSentenceBreakIterator = initializeIterator(UBRK_SENTENCE);
+-#else
+-    WKC_DEFINE_STATIC_TYPE(UBreakIterator*, staticSentenceBreakIterator, initializeIterator(UBRK_SENTENCE));
+-#endif
+     if (!staticSentenceBreakIterator)
+         return nullptr;
+ 
+     return setTextForIterator(*staticSentenceBreakIterator, string);
+-#else
+-    return sentenceBreakIteratorWKC(string);
+-#endif
+ }
+ 
+ UBreakIterator* acquireLineBreakIterator(StringView string, const AtomString& locale, const UChar* priorContext, unsigned priorContextLength, LineBreakIteratorMode mode)
+ {
+-#if defined(WKC_USE_ICU)
+-    if (!JSC::Options::useIntl())
+-        return acquireLineBreakIteratorWKC(string, locale, priorContext, priorContextLength, mode);
+-
+     UBreakIterator* iterator = LineBreakIteratorPool::sharedPool().take(locale, mode);
+     if (!iterator)
+         return nullptr;
+ 
+     return setContextAwareTextForIterator(*iterator, string, priorContext, priorContextLength);
+-#else
+-    return acquireLineBreakIteratorWKC(string, locale, priorContext, priorContextLength, mode);
+-#endif
+ }
+ 
+ void releaseLineBreakIterator(UBreakIterator* iterator)
+ {
+-#if defined(WKC_USE_ICU)
+-    if (!JSC::Options::useIntl())
+-        return releaseLineBreakIteratorWKC(iterator);
+-
+     ASSERT_ARG(iterator, iterator);
+ 
+     LineBreakIteratorPool::sharedPool().put(iterator);
+-#else
+-    return releaseLineBreakIteratorWKC(iterator);
+-#endif
+ }
+ 
+ UBreakIterator* openLineBreakIterator(const AtomString& locale)
+ {
+-#if defined(WKC_USE_ICU)
+-    // FIXME: implement for WKC platform
+-    if (!JSC::Options::useIntl())
+-        return nullptr;
+-#endif
+-
+     bool localeIsEmpty = locale.isEmpty();
+     UErrorCode openStatus = U_ZERO_ERROR;
+     UBreakIterator* ubrkIter = ubrk_open(UBRK_LINE, localeIsEmpty ? currentTextBreakLocaleID() : locale.string().utf8().data(), nullptr, 0, &openStatus);
+@@ -269,11 +223,7 @@
+     iterator = nullptr;
+ }
+ 
+-#if !PLATFORM(WKC)
+ static std::atomic<UBreakIterator*> nonSharedCharacterBreakIterator = ATOMIC_VAR_INIT(nullptr);
+-#else
+-WKC_DEFINE_GLOBAL_TYPE(std::atomic<UBreakIterator*>, nonSharedCharacterBreakIterator, ATOMIC_VAR_INIT(nullptr));
+-#endif
+ 
+ static inline UBreakIterator* getNonSharedCharacterBreakIterator()
+ {
+@@ -288,57 +238,16 @@
+         ubrk_close(old);
+ }
+ 
+-#if PLATFORM(WKC)
+-static UBreakIterator*
+-nonSharedCharacterBreakIteratorWKC(StringView string)
+-{
+-    auto iterator = (UBreakIterator *)wkcTextBreakIteratorNewPeer(WKC_TEXTBREAKITERATOR_TYPE_CHARACTER_NONSHARED);
+-    if (!iterator)
+-        CRASH();
+-    if (string.is8Bit()) {
+-        UChar* p = (UChar *)WTF::fastZeroedMalloc((string.length()+1) * sizeof(UChar));
+-        for (size_t i=0; i<string.length(); i++) {
+-            p[i] = string.characters8()[i];
+-        }
+-        wkcTextBreakIteratorSetStringPeer((void *)iterator, p, string.length());
+-        WTF::fastFree(p);
+-    } else {
+-        wkcTextBreakIteratorSetStringPeer((void *)iterator, string.characters16(), string.length());
+-    }
+-    return iterator;
+-}
+-#endif
+-
+ NonSharedCharacterBreakIterator::NonSharedCharacterBreakIterator(StringView string)
+ {
+-#if defined(WKC_USE_ICU)
+-    if (!JSC::Options::useIntl()) {
+-        m_iterator = nonSharedCharacterBreakIteratorWKC(string);
+-        return;
+-    }
+-
+     if ((m_iterator = getNonSharedCharacterBreakIterator()))
+         m_iterator = setTextForIterator(*m_iterator, string);
+-#else
+-    m_iterator = nonSharedCharacterBreakIteratorWKC(string);
+-#endif
+ }
+ 
+ NonSharedCharacterBreakIterator::~NonSharedCharacterBreakIterator()
+ {
+-#if defined(WKC_USE_ICU)
+-    if (!JSC::Options::useIntl()) {
+-        if (m_iterator)
+-            wkcTextBreakIteratorDeletePeer((void* )m_iterator);
+-        return;
+-    }
+-
+     if (m_iterator)
+         cacheNonSharedCharacterBreakIterator(m_iterator);
+-#else
+-    if (m_iterator)
+-        wkcTextBreakIteratorDeletePeer((void* )m_iterator);
+-#endif
+ }
+ 
+ NonSharedCharacterBreakIterator::NonSharedCharacterBreakIterator(NonSharedCharacterBreakIterator&& other)
+@@ -351,23 +260,12 @@
+ 
+ bool isWordTextBreak(UBreakIterator* iterator)
+ {
+-#if defined(WKC_USE_ICU)
+-    if (!JSC::Options::useIntl())
+-        return isWordTextBreakWKC(iterator);
+-
+     int ruleStatus = ubrk_getRuleStatus(iterator);
+     return ruleStatus != UBRK_WORD_NONE;
+-#else
+-    return isWordTextBreakWKC(iterator);
+-#endif
+ }
+ 
+ unsigned numGraphemeClusters(StringView string)
+ {
+-#if defined(WKC_USE_ICU)
+-    if (!JSC::Options::useIntl())
+-        return numGraphemeClustersWKC(string);
+-
+     unsigned stringLength = string.length();
+     
+     if (!stringLength)
+@@ -392,17 +290,10 @@
+     while (ubrk_next(iterator) != UBRK_DONE)
+         ++numGraphemeClusters;
+     return numGraphemeClusters;
+-#else
+-    return numGraphemeClustersWKC(string);
+-#endif
+ }
+ 
+ unsigned numCodeUnitsInGraphemeClusters(StringView string, unsigned numGraphemeClusters)
+ {
+-#if defined(WKC_USE_ICU)
+-    if (!JSC::Options::useIntl())
+-        return numCodeUnitsInGraphemeClustersWKC(string, numGraphemeClusters);
+-
+     unsigned stringLength = string.length();
+ 
+     if (stringLength <= numGraphemeClusters)
+@@ -428,9 +319,6 @@
+             return stringLength;
+     }
+     return ubrk_current(iterator);
+-#else
+-    return numCodeUnitsInGraphemeClustersWKC(string, numGraphemeClusters);
+-#endif
+ }
+ 
+ } // namespace WTF
+--- a/Source/WTF/wtf/unicode/icu/CollatorICU.cpp
++++ b/Source/WTF/wtf/unicode/icu/CollatorICU.cpp
+@@ -43,23 +43,12 @@
+ #include <wtf/RetainPtr.h>
+ #endif
+ 
+-#if defined(WKC_USE_ICU)
+-#include "Options.h"
+-#endif
+-
+ namespace WTF {
+ 
+-#if !PLATFORM(WKC)
+ static Lock cachedCollatorLock;
+ static UCollator* cachedCollator WTF_GUARDED_BY_LOCK(cachedCollatorLock);
+ static char* cachedCollatorLocale;
+ static bool cachedCollatorShouldSortLowercaseFirst;
+-#else
+-static WKC_DEFINE_GLOBAL_TYPE_DEFAULT_ZERO(Lock, cachedCollatorLock);
+-static WKC_DEFINE_GLOBAL_TYPE_ZERO(UCollator*, cachedCollator);
+-static WKC_DEFINE_GLOBAL_TYPE_ZERO(char*, cachedCollatorLocale);
+-static WKC_DEFINE_GLOBAL_BOOL_ZERO(cachedCollatorShouldSortLowercaseFirst);
+-#endif
+ 
+ #if !(OS(DARWIN) && USE(CF))
+ 
+@@ -96,8 +85,8 @@
+     // Since iOS and OS X don't set UNIX locale to match the user's selected locale, the ICU default locale is not the right one.
+     // So, instead of passing null to ICU, we pass the name of the user's selected locale.
+     static char* defaultLocale;
+-    static WKCStd::once_flag initializeDefaultLocaleOnce;
+-    WKCStd::call_once(initializeDefaultLocaleOnce, []{
++    static std::once_flag initializeDefaultLocaleOnce;
++    std::call_once(initializeDefaultLocaleOnce, []{
+         defaultLocale = copyDefaultLocale();
+     });
+     return defaultLocale;
+@@ -113,14 +102,6 @@
+ 
+ Collator::Collator(const char* locale, bool shouldSortLowercaseFirst)
+ {
+-#if !defined(WKC_USE_ICU)
+-    m_shouldSortLowercaseFirst = shouldSortLowercaseFirst;
+-#else
+-    if (!JSC::Options::useIntl()) {
+-        m_shouldSortLowercaseFirst = shouldSortLowercaseFirst;
+-        return;
+-    }
+-
+     UErrorCode status = U_ZERO_ERROR;
+ 
+     {
+@@ -150,15 +131,10 @@
+ 
+     m_locale = locale ? fastStrDup(locale) : nullptr;
+     m_shouldSortLowercaseFirst = shouldSortLowercaseFirst;
+-#endif
+ }
+ 
+ Collator::~Collator()
+ {
+-#if defined(WKC_USE_ICU)
+-    if (!JSC::Options::useIntl())
+-        return;
+-
+     Locker locker { cachedCollatorLock };
+     if (cachedCollator) {
+         ucol_close(cachedCollator);
+@@ -167,7 +143,6 @@
+     cachedCollator = m_collator;
+     cachedCollatorLocale = m_locale;
+     cachedCollatorShouldSortLowercaseFirst = m_shouldSortLowercaseFirst;
+-#endif
+ }
+ 
+ static int32_t getIndexLatin1(UCharIterator* iterator, UCharIteratorOrigin origin)
+@@ -269,19 +244,12 @@
+ 
+ int Collator::collate(StringView a, StringView b) const
+ {
+-#if defined(WKC_USE_ICU)
+-    if (!JSC::Options::useIntl())
+-        return collateWKC(a, b);
+-
+     UCharIterator iteratorA = createIterator(a);
+     UCharIterator iteratorB = createIterator(b);
+     UErrorCode status = U_ZERO_ERROR;
+     int result = ucol_strcollIter(m_collator, &iteratorA, &iteratorB, &status);
+     ASSERT(U_SUCCESS(status));
+     return result;
+-#else
+-    return collateWKC(a, b);
+-#endif
+ }
+ 
+ static UCharIterator createIteratorUTF8(const char* string)
+@@ -293,19 +261,12 @@
+ 
+ int Collator::collateUTF8(const char* a, const char* b) const
+ {
+-#if defined(WKC_USE_ICU)
+-    if (!JSC::Options::useIntl())
+-        return collateUTF8WKC(a, b);
+-
+     UCharIterator iteratorA = createIteratorUTF8(a);
+     UCharIterator iteratorB = createIteratorUTF8(b);
+     UErrorCode status = U_ZERO_ERROR;
+     int result = ucol_strcollIter(m_collator, &iteratorA, &iteratorB, &status);
+     ASSERT(U_SUCCESS(status));
+     return result;
+-#else
+-    return collateUTF8WKC(a, b);
+-#endif
+ }
+ 
+ } // namespace WTF
+--- a/Source/JavaScriptCore/config.h
++++ b/Source/JavaScriptCore/config.h
+@@ -23,6 +23,12 @@
+ #include "cmakeconfig.h"
+ #endif
+ 
++#include <wtf/wkcshim.h>
++
++// ACCESS's build defines ENABLE_WKC_INTL; the fork's Intl implementation files
++// are compile-gated on it while Temporal* calls into them unconditionally.
++#define ENABLE_WKC_INTL 1
++
+ #define JSC_API_AVAILABLE(...)
+ #define JSC_CLASS_AVAILABLE(...) JS_EXPORT
+ #define JSC_API_DEPRECATED(...)
+--- a/Source/JavaScriptCore/runtime/ArgList.h
++++ b/Source/JavaScriptCore/runtime/ArgList.h
+@@ -22,6 +22,7 @@
+ #pragma once
+ 
+ #include "CallFrame.h"
++#include "JSCast.h"
+ #include <wtf/CheckedArithmetic.h>
+ #include <wtf/ForbidHeapAllocation.h>
+ #include <wtf/HashSet.h>
+--- a/Source/JavaScriptCore/runtime/DatePrototype.cpp
++++ b/Source/JavaScriptCore/runtime/DatePrototype.cpp
+@@ -37,7 +37,11 @@
+ #include "TemporalInstant.h"
+ #include <wtf/Assertions.h>
+ 
+-#if PLATFORM(WKC)
++#if HAVE(LANGINFO_H)
++#include <langinfo.h>
++#endif
++
++#if PLATFORM(WKC) || HAVE(LANGINFO_H)
+ using WTF::equivalentYearForDST;
+ #endif
+ 
+--- a/Source/JavaScriptCore/runtime/JSDateMath.cpp
++++ b/Source/JavaScriptCore/runtime/JSDateMath.cpp
+@@ -152,7 +152,7 @@
+     // We can return any values in this case since later we fail when computing non timezone offset part anyway.
+     constexpr LocalTimeOffset failed { false, 0 };
+ 
+-#if ENABLE(WKC_INTL)
++#if ENABLE(WKC_INTL) && !HAVE(ICU_C_TIMEZONE_API)
+     if (!Options::useIntl()) {
+         // TODO: Implement TimeZone cache.
+         auto& timeZoneCache = *this->timeZoneCache();

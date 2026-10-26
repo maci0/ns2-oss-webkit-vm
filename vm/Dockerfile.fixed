@@ -1,0 +1,33 @@
+# Fixed control: upstream WebKit 613.3.9 + the ade92866440 DeferGC fix.
+FROM --platform=linux/arm64 debian:bookworm
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential cmake ninja-build perl python3 ruby \
+        bison flex gperf pkg-config \
+        libicu-dev libedit-dev libxml2-dev libsqlite3-dev zlib1g-dev \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY src /src
+COPY fix.py /fix.py
+RUN python3 /fix.py /src/Source/JavaScriptCore/runtime/ErrorInstance.cpp
+
+ARG JOBS=16
+
+RUN --mount=type=cache,target=/build-fixed,sharing=locked \
+    cmake -G Ninja -S /src -B /build-fixed \
+        -DPORT=JSCOnly \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DENABLE_STATIC_JSC=ON \
+        -DENABLE_API_TESTS=OFF \
+        -DENABLE_TOOLS=OFF \
+        -DUSE_CAPSTONE=OFF \
+    && ninja -C /build-fixed -j"${JOBS}" jsc \
+    && install -m 0755 "$(find /build-fixed -type f -name jsc -perm -u+x | head -n1)" /usr/local/bin/jsc
+
+COPY error-instance.js /opt/error-instance.js
+
+WORKDIR /work
+CMD ["jsc", "/opt/error-instance.js"]

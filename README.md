@@ -1,45 +1,38 @@
 # ns2-oss-webkit-vm
 
-Runbook for the aarch64 JavaScriptCore test VM used in this WebKit research:
-pristine upstream **WebKit 613.3.9** (`WebKit-7613.3.9`), `PORT=JSCOnly`,
-`linux/arm64`, built in Docker and run on an x86_64 host under `qemu-user`
-with JIT disabled.
+Runbooks for running two aarch64 JavaScriptCore builds on an x86_64 host, in
+Docker, under `qemu-user`, with JIT disabled:
 
-It reproduces the GC re-entrancy in `JSC::ErrorInstance::computeErrorInfo`
-(upstream `ade92866440`, WebKit bug 267785) and documents how the
-heap-grooming, arbitrary-read and gdb experiments around it were run.
+1. **Upstream** `WebKit-7613.3.9` (pristine WebKit 613.3.9), `PORT=JSCOnly` —
+   the test VM used for the heap-grooming, arbitrary-read and gdb work around
+   `JSC::ErrorInstance::computeErrorInfo` (upstream `ade92866440`, WebKit bug
+   267785).
+2. **Vendor** `webkit_3.12.11` — the JavaScriptCore ACCESS ships in the Switch 2
+   `SystemUpdate 23.0.0` open-source release, grafted onto the upstream 613.3.9
+   build system so it can be compiled and run outside the console.
 
-**→ [VM-SETUP.md](VM-SETUP.md)**
+| document | what it covers |
+|---|---|
+| [VM-SETUP.md](VM-SETUP.md) | upstream VM: build, qemu-user run path, test families, gdb, pitfalls, smoke test |
+| [NINTENDO-BUILD.md](NINTENDO-BUILD.md) | vendor build: what the drop contains, the graft, the 11-file build patch, build and tests |
 
-## What is in here
+## Layout
 
-Only the runbook. It covers:
+```
+vm/           Dockerfiles (release, DeferGC control, debug) + repro/gdb scripts
+nintendo/     Dockerfile, graft.sh, patches/0001-build-shims.patch,
+              upstream/ (613.3.9 cmake/bmalloc/gtest scaffolding), smoke tests
+```
 
-1. prerequisites (host, docker, qemu-user 11.1.2, gdb, disk);
-2. the exact `docker build` and what the Dockerfile does, with measured build
-   times, plus the patched control (`DeferGC`) and the debug build;
-3. the fast qemu-user path (`docker export` rootfs, `-L`, `--useJIT=false`,
-   `ulimit -c 0`) and why JIT must be off;
-4. running the repro and the page test families via `load()` +
-   `Ns2Webkit.runFamily(...)`, and the `--useConcurrentGC=false` determinism
-   flag;
-5. host gdb over the qemu gdbstub, including what the captured backtraces show;
-6. the sweep and grooming scripts and how results were recorded (including
-   which result files were never preserved);
-7. known pitfalls: the JIT startup crash, qemu SIMD artifacts, symbol-less
-   Release builds, GC timing, and what did and did not transfer from this
-   upstream build to the console fork;
-8. a five-step smoke test.
+The vendor modules (`webkit_3.12.11/{JavaScriptCore,WTF}`) are **not** in this
+repository; see NINTENDO-BUILD.md §2. Neither are the research harnesses
+(`oss/vm/`, `ns2jb-webkit/`, the scratch scripts in `/tmp/opencode/`); the
+documents give their contents where needed.
 
-The scripts and harnesses it references (`oss/vm/`, `ns2jb-webkit/`, and the
-scratch harnesses in `/tmp/opencode/`) are part of the private research tree
-and are not published here; the document gives their contents where they are
-needed.
-
-## Quick start
+## Quick start — upstream
 
 ```sh
-cd oss/vm
+cd vm
 docker build --platform linux/arm64 -f Dockerfile -t ns2jsc .
 ```
 
@@ -54,8 +47,18 @@ qemu-aarch64 -L $ROOT $ROOT/usr/local/bin/jsc --useJIT=false -e 'print(1+1)'
 
 Expected: `2`.
 
+## Quick start — vendor JSC 3.12.11
+
+```sh
+mkdir -p nintendo/vendor
+cp -a <drop>/webkit_3.12.11/{JavaScriptCore,WTF} nintendo/vendor/
+docker build --platform linux/arm64 -f nintendo/Dockerfile -t ns2jsc-fork nintendo
+docker run --rm ns2jsc-fork
+```
+
+Expected: the four `test-smoke.js` lines, ending in `error.stack=`.
+
 ## Scope
 
-Documentation of a local test environment for upstream WebKit, not a
-console exploit chain: no payloads, no target binaries, no keys. All upstream
-commits referenced are public.
+Documentation of a local test environment for public WebKit sources and an
+open-source vendor drop: no payloads, no target binaries, no keys.

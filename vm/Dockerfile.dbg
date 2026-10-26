@@ -1,0 +1,32 @@
+# Same source and options as ns2jsc, but RelWithDebInfo so gdb can show
+# line numbers and inline frames (used to pin the fault site).
+FROM --platform=linux/arm64 debian:bookworm
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential cmake ninja-build perl python3 ruby \
+        bison flex gperf pkg-config \
+        libicu-dev libedit-dev libxml2-dev libsqlite3-dev zlib1g-dev \
+        ca-certificates gdb \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY src /src
+
+ARG JOBS=16
+
+RUN --mount=type=cache,target=/build-dbg,sharing=locked \
+    cmake -G Ninja -S /src -B /build-dbg \
+        -DPORT=JSCOnly \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DENABLE_STATIC_JSC=ON \
+        -DENABLE_API_TESTS=OFF \
+        -DENABLE_TOOLS=OFF \
+        -DUSE_CAPSTONE=OFF \
+    && ninja -C /build-dbg -j"${JOBS}" jsc \
+    && install -m 0755 "$(find /build-dbg -type f -name jsc -perm -u+x | head -n1)" /usr/local/bin/jsc
+
+COPY error-instance.js /opt/error-instance.js
+
+WORKDIR /work
+CMD ["jsc", "/opt/error-instance.js"]

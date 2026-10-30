@@ -116,7 +116,11 @@ because the second pair already exists and ninja considers it up to date.
 2023 source needs against a 2026 toolchain: `<cstdint>` in ANGLE,
 `FrameLoader.h` + `FrameLoaderClient.h` in `MixedContentChecker.cpp`, and the
 `const xmlError*` signature for `XSLTProcessor::parseErrorFunc` (libxml2 2.12+).
-None of them touch an audited site.
+None of them touch an audited site. The same flag also applies the `PixelBuffer`
+modelling patch.
+
+The full build record, including the silent-header trap and the rebuild loop, is
+[`BUILD-NOTES.md`](BUILD-NOTES.md).
 
 ### Runtime paths
 

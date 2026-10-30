@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>transform-gate: probe the CSS transform fast path with short strings</title>
+<!--
+  Audit item #6 (docs/V19-FIX-DELTA.md).
+
+  This page is a probe, not a PoC: it feeds the 19.0.0 CSS transform fast path
+  every short `translate*` shape that could reach the pos[9]/pos[10]/pos[11]
+  reads with fewer than twelve characters left, plus the shapes that the
+  pre-scan must reject first.  Expected result on the ASAN build: no sanitizer
+  output, because transformCanLikelyUseFastPath() requires the closing ')' of
+  the last component to be the last character of the string, which makes
+  __end - pos >= 10 and forces pos[9] == ')' in the only 10-character case.
+
+  If this page does produce a heap-buffer-overflow read in
+  parseSimpleTransformValue, the item is reachable after all and the negative
+  result in docs/V19-BRANCH.md is wrong.
+-->
+<script>
+function log(m) {
+  document.title = m;
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
+    try { window.webkit.messageHandlers.log.postMessage(m); } catch (e) {}
+  }
+  try { console.log(m); } catch (e) {}
+}
+
+const cases = [];
+const tails = ["x", "y", "z", "3", "(", ")", "d", "d(", "()", "()x", "x()", ")"];
+for (const t of tails) {
+  cases.push("translate" + t);          // 9..12 chars, no argument list
+  cases.push("translate" + t + ")");
+  cases.push("rotate(0)" + "translate" + t);
+  cases.push("rotate(0)translate" + t + ")");
+  cases.push(" translate" + t);
+}
+cases.push("translate");
+cases.push("translate)");
+cases.push("translate()");
+cases.push("translate3d(");
+cases.push("translatex(");
+cases.push("translate(");
+cases.push("rotate(0) translate(");
+
+let i = 0;
+const probe = document.createElement("div");
+document.documentElement.appendChild(probe);
+
+function tick() {
+  if (i < cases.length) {
+    const v = cases[i++];
+    // The fast path handles the `transform` property; also exercise the two
+    // other entry points that share parseSimpleTransform().
+    probe.style.transform = v;
+    probe.style.webkitTransform = v;
+    void probe.style.transform;
+    void probe.getBoundingClientRect();
+    if (i % 25 === 0)
+      log("fed " + i + "/" + cases.length + " short transform strings");
+    requestAnimationFrame(tick);
+    return;
+  }
+  log("all " + cases.length + " short transform strings parsed; still alive");
+  document.title = "done";
+}
+
+requestAnimationFrame(tick);
+setTimeout(function () { log("8 s: no sanitizer report"); }, 8000);
+</script>

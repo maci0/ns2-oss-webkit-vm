@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>getcontext-probe: does the options dictionary invoke getters, and in what order?</title>
+<script>
+function log(m) {
+  document.title = m;
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
+    try { window.webkit.messageHandlers.log.postMessage(m); } catch (e) {}
+  }
+  try { console.log(m); } catch (e) {}
+}
+
+const hits = [];
+const opts = {
+  get willReadFrequently() { hits.push("willReadFrequently"); return false; },
+  get alpha() { hits.push("alpha"); return true; },
+  get desynchronized() { hits.push("desynchronized"); return false; },
+  get colorSpace() { hits.push("colorSpace"); return "srgb"; },
+};
+
+const c = document.createElement("canvas");
+c.width = 8;
+c.height = 8;
+const ctx = c.getContext("2d", opts);
+log("ctx=" + (ctx ? "ok" : "null") + " hits=[" + hits.join(",") + "]");
+
+// second canvas: does a re-entrant call inside a getter succeed?
+const c2 = document.createElement("canvas");
+c2.width = 8;
+c2.height = 8;
+let inner = null;
+let outer = null;
+outer = c2.getContext("2d", {
+  get alpha() { inner = c2.getContext("2d"); log("inner during alpha getter = " + (inner ? "ok" : "null")); return true; },
+});
+log("outer=" + (outer ? "ok" : "null") + " inner=" + (inner ? "ok" : "null") + " same=" + (outer === inner));
+</script>

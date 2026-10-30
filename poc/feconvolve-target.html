@@ -64,11 +64,12 @@ function log(m) {
 
 const qs = new URLSearchParams(location.search);
 const TARGET_Y = Number(qs.get("targetY") || 45);
-// Every byte the applier writes is clamp(totals / divisor + bias).  With an
-// all-zero kernel and divisor 1 that is exactly clamp(bias), so ?bias=<0..255>
-// makes the overflowing bytes a constant the page chose.
+// Every byte the applier writes is clamp(totals / divisor + bias), and with an
+// all-zero kernel and divisor 1 that is exactly clamp(bias).  feConvolveMatrix's
+// bias attribute is a number in [0,1] that the applier scales by 255, so
+// ?bias=<0..255> makes every overflowing byte the constant the page chose.
 const BIAS = Number(qs.get("bias") || 65);
-m.setAttribute("bias", String(BIAS));
+m.setAttribute("bias", String(BIAS / 255));
 let step = 0;
 
 function tick() {
@@ -92,9 +93,13 @@ function tick() {
     return;
   }
   if (step === 4) {
+    // The applier writes the interior block row by row and advances exactly
+    // width*4 = 1024 bytes per row, starting at targetY*1024.  The buffer holds
+    // exactly 256 rows, so the row that starts at or past the end starts at
+    // byte 262144 = the end of the buffer, whatever targetY is.  254 rows x
+    // 1016 bytes are written from there, i.e. 44,024 bytes past the end.
     log("still alive after the repaint; expected first write is byte " +
-        (256 * 4 * (TARGET_Y + 253 - 42)) + " against a " +
-        (256 * 256 * 4) + "-byte buffer");
+        (256 * 256 * 4) + " against a " + (256 * 256 * 4) + "-byte buffer");
   }
   r.setAttribute("fill", (step & 1) ? "#123456" : "#654321");
   requestAnimationFrame(tick);

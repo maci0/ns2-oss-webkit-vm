@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.11" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>WebKit fork delta: 23.0.1 fixes absent from 19.0.0</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <style>
+    :root {
+      --fg: #1c1b19;
+      --dim: #5a5750;
+      --bg: #fbfaf7;
+      --rule: #dcd8ce;
+      --accent: #8a1c1c;
+      --code-bg: #f0ede4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --fg: #e8e4da;
+        --dim: #a09a8c;
+        --bg: #16151a;
+        --rule: #34313a;
+        --accent: #e0705f;
+        --code-bg: #24222a;
+      }
+    }
+    html { background: var(--bg); }
+    body {
+      margin: 0 auto;
+      padding: 3rem 1.5rem 6rem;
+      max-width: 64rem;
+      color: var(--fg);
+      background: var(--bg);
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            "Helvetica Neue", Arial, sans-serif;
+      -webkit-text-size-adjust: 100%;
+    }
+    header#title-block-header h1.title {
+      font-size: 1.9rem;
+      line-height: 1.25;
+      margin: 0 0 0.4rem;
+      letter-spacing: -0.01em;
+    }
+    h2 {
+      margin: 2.6rem 0 0.8rem;
+      font-size: 1.3rem;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 0.3rem;
+    }
+    h3 { margin: 2rem 0 0.6rem; font-size: 1.05rem; color: var(--accent); }
+    p, li { max-width: 46rem; }
+    code {
+      font-family: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+      font-size: 0.86em;
+      background: var(--code-bg);
+      padding: 0.1em 0.32em;
+      border-radius: 3px;
+      word-break: break-word;
+    }
+    pre {
+      background: var(--code-bg);
+      padding: 0.9rem 1rem;
+      border-radius: 5px;
+      overflow-x: auto;
+      border-left: 3px solid var(--rule);
+    }
+    pre code { background: none; padding: 0; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1rem 0 1.6rem;
+      font-size: 0.9rem;
+      display: block;
+      overflow-x: auto;
+    }
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      padding: 0.45rem 0.6rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    th { font-weight: 600; white-space: nowrap; }
+    tbody tr:last-child td { border-bottom: none; }
+    td code { white-space: nowrap; }
+    a { color: var(--accent); }
+    blockquote {
+      margin: 1.2rem 0;
+      padding: 0.2rem 0 0.2rem 1rem;
+      border-left: 3px solid var(--accent);
+      color: var(--dim);
+    }
+    hr { border: none; border-top: 1px solid var(--rule); margin: 2.5rem 0; }
+    @media print {
+      body { background: #fff; color: #000; max-width: none; padding: 0; font-size: 11pt; }
+      h2 { page-break-after: avoid; }
+      table { font-size: 9pt; display: table; }
+      tr, pre { page-break-inside: avoid; }
+      a { color: #000; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+<h1
+id="webkit-fork-delta-fixes-shipped-in-switch-2-2301-but-not-in-1900">WebKit
+fork delta: fixes shipped in Switch 2 23.0.1 but not in 19.0.0</h1>
+<p>A source-level audit of the <code>NetFrontBrowserNX</code>
+open-source drops for two Switch 2 firmwares. It answers one question:
+<strong>what did Nintendo fix between system 19.0.0 and 23.0.1 that a
+web page can still reach on 19.0.0?</strong></p>
+<p>The two vendor JavaScriptCore trees are the same ones this repository
+already builds: <code>webkit_3.6.8</code> (19.0.0) and
+<code>webkit_3.12.11</code> (23.0.1), both grafted onto upstream WebKit
+613.3.9. Companion documents: <a
+href="NINTENDO-BUILD.md"><code>NINTENDO-BUILD.md</code></a> (the vendor
+graft and build), <a href="VM-SETUP.md"><code>VM-SETUP.md</code></a>
+(the upstream 613.3.9 JSC VM), and <a
+href="delta"><code>delta/</code></a> (the two analysis tools plus their
+recorded output).</p>
+<h2 id="1-summary">1. Summary</h2>
+<p>Both drops are built on <strong>upstream WebKit 613.3.9</strong>
+(<code>WebKit-7613.3.9</code>, <code>WKC_WEBKIT_VERSION "613.0"</code>).
+23.0.1 is not a plain fork of that tag: it carries selected upstream
+fixes pulled forward over 2024–2026, which 19.0.0 — the first Switch 2
+release, October 2024 — does not have.</p>
+<table>
+<tbody>
+<tr>
+<td>files differing between the two <code>webkit_x.y.z</code> trees</td>
+<td>533</td>
+</tr>
+<tr>
+<td>mechanical (WKC namespace/version churn)</td>
+<td>206</td>
+</tr>
+<tr>
+<td>semantic (needs a human read)</td>
+<td>321</td>
+</tr>
+<tr>
+<td>only in 23.0.1</td>
+<td>6 (all Largest Contentful Paint)</td>
+</tr>
+<tr>
+<td>only in 19.0.0</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>fixes found in 23.0.1 and absent from 19.0.0</strong></td>
+<td><strong>29</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Six of the 29 are memory-safety bugs reachable from ordinary page
+content, and five of those six are one coherent SVG-filter series: a
+SMIL animation can install an out-of-range filter parameter, and 19.0.0
+then indexes past the end of a pixel buffer. The rest are
+origin/CSP/sandbox checks, lifetime and crash fixes, and hardening.</p>
+<h2 id="2-method">2. Method</h2>
+<p>Reproducible from the two extracted source trees; no console, no
+build. The tools and their output are in <a
+href="delta"><code>delta/</code></a>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> delta</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. classify every differing file, WKC churn normalised out</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> compare-forks.py <span class="dt">\</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  NS2_19.0.0/webkit_3.6.8 <span class="dt">\</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  NS2_23.0.0/webkit_3.12.11 <span class="dt">\</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--json</span> fork-delta.json</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. pull fix-shaped added lines out of the 321 semantic files</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> fix-candidates.py <span class="at">--json</span></span></code></pre></div>
+<p>Step 1 normalises <code>WKCStd::</code>→<code>std::</code>,
+<code>WKCWTF::</code>→<code>WTF::</code>, fork revision numbers in prose
+and copyright-year ranges, then compares. Step 2 keeps only
+<strong>added</strong> lines matching bounds checks,
+<code>RELEASE_ASSERT</code>, <code>Checked&lt;&gt;</code>, overflow/OOM
+guards, <code>rdar://</code>/bug-id comments and exception throws: 40
+files, 123 lines. Every one of those hunks was then read in full, and a
+second sweep over the remaining 281 semantic files looked for runtime
+guards (<code>if (… &gt;= …)</code>) inside changed code.</p>
+<p>To re-run it, extract both drops so the trees sit at
+<code>delta/NS2_19.0.0/</code> and <code>delta/NS2_23.0.0/</code> (the
+defaults above), or pass other paths. The committed
+<code>delta/fork-delta.json</code> and
+<code>delta/fix-candidates.json</code> are the output of the two
+commands, so the result can be read without downloading 340 MB of
+source.</p>
+<h2 id="3-the-list">3. The list</h2>
+<p>Ordered by relevance to an attacker holding a web page.</p>
+<h3 id="31-memory-safety-reachable-from-a-plain-page">3.1 Memory safety,
+reachable from a plain page</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>file</th>
+<th>what 23.0.1 adds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>JavaScriptCore/runtime/StringPrototype.cpp</code></td>
+<td><code>normalize()</code> rejects input ≥ 2³⁰ UTF-16 units before
+calling ICU — <code>rdar://160634825</code>, ICU buffer-length
+overflow</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>WebCore/platform/graphics/filters/software/FEDisplacementMapSoftwareApplier.cpp</code></td>
+<td><code>xChannelSelector</code>/<code>yChannelSelector</code>
+bounds-checked against <code>CHANNEL_R..CHANNEL_A</code> before indexing
+the displacement pixel buffer — out-of-bounds read</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>WebCore/svg/properties/SVGAnimationDiscreteFunctionImpl.h</code></td>
+<td><code>setFromAndToValues()</code> ignores values
+<code>SVGPropertyTraits&lt;EnumType&gt;::fromString()</code> failed to
+parse, so <code>&lt;set to="foo"&gt;</code> can no longer install an
+unknown enum — validation bypass that enables 2 and 4</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>WebCore/svg/properties/SVGAnimationDiscreteFunction.h</code></td>
+<td><code>m_from</code>/<code>m_to</code> value-initialised, so a
+rejected value leaves 0 instead of an indeterminate enum</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>WebCore/svg/SVGFEConvolveMatrixElement.cpp</code></td>
+<td>new
+<code>isValidTargetXOffset()</code>/<code>isValidTargetYOffset()</code>,
+applied on attribute change <em>and</em> at filter build; the old check
+only ran when <code>targetX</code>/<code>targetY</code> was written
+explicitly — out-of-bounds read</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>WebCore/css/parser/CSSParserFastPaths.cpp</code></td>
+<td>the <code>translate()</code> fast path requires 12 characters
+(<code>"translate(0)"</code>) before reading <code>pos[8..11]</code>;
+previously only 9 were guaranteed — out-of-bounds read</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>WebCore/css/CSSGradientValue.cpp</code></td>
+<td>a repeating gradient whose range is below 2⁻¹⁶ skips stop
+replication instead of materialising an enormous stop vector — memory
+denial of service</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>WebCore/Modules/indexeddb/IDBKey.cpp</code></td>
+<td><code>createBinary()</code> returns an invalid key for a detached
+<code>JSArrayBuffer</code>/<code>JSArrayBufferView</code> instead of
+reading <code>data()</code>/<code>byteLength()</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-origin-csp-and-sandbox">3.2 Origin, CSP and sandbox</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>file</th>
+<th>what 23.0.1 adds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>9</td>
+<td><code>WebCore/css/CSSStyleSheet.cpp</code></td>
+<td><code>insertRule()</code>/<code>deleteRule()</code> return
+<code>SecurityError</code> on a cross-origin sheet;
+<code>canAccessRules()</code> returns false when the owner document is
+gone</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>WebCore/page/csp/ContentSecurityPolicySource.cpp</code></td>
+<td>CSP3 path matching: split both paths into segments, then
+percent-decode per segment — closes a <code>%2F</code> bypass;
+<code>/</code> matches the empty path</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>WebCore/loader/PingLoader.cpp</code></td>
+<td>pings honour <code>connect-src</code> via
+<code>allowConnectToSource()</code></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>WebCore/loader/FrameLoader.cpp</code>,
+<code>NavigationRequester.h</code></td>
+<td><code>sandboxFlags</code> and <code>documentIdentifier</code> are
+serialised with the navigation requester, and a pending
+<code>javascript:</code> URL load is refused when the requester is
+<code>SandboxScripts</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>WebCore/loader/MediaResourceLoader.cpp</code></td>
+<td>cross-origin media loaded into a main-resource document is tagged
+<code>LoadedFromOpaqueSource</code></td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>WebCore/loader/FrameLoader.cpp</code></td>
+<td>same-site info is taken from the initiator and dropped when the
+origin is inherited from the owner</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-lifetime-re-entrancy-and-crash">3.3 Lifetime, re-entrancy and
+crash</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>file</th>
+<th>what 23.0.1 adds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>15</td>
+<td><code>WebCore/html/HTMLCanvasElement.cpp</code></td>
+<td><code>getContext()</code> re-checks <code>m_context</code> after IDL
+dictionary conversion (which can run script and re-enter); the "no
+context yet" asserts became
+<code>ASSERT_WITH_SECURITY_IMPLICATION</code></td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>WebCore/rendering/RenderDeprecatedFlexibleBox.cpp</code></td>
+<td>line-clamp teardown also fires when the <em>new</em> style sets one
+(the WKC branch fixes an <code>&amp;&amp;</code>/<code>||</code>
+precedence bug), so a stale clamp renderer is not reused</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>WebCore/platform/audio/HRTFDatabaseLoader.cpp</code></td>
+<td>the loader map holds <code>ThreadSafeWeakPtr</code>, and the
+destructor only unregisters when the mapped loader is itself —
+use-after-free race</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>JavaScriptCore/runtime/JSModuleRecord.cpp</code></td>
+<td><code>rdar://107531050</code> mitigation: an unresolved import that
+decodes as <code>jsUndefined</code> becomes a <code>SyntaxError</code>
+instead of being dereferenced</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>WebCore/rendering/svg/SVGRenderSupport.cpp</code></td>
+<td><code>mapLocalToContainer()</code> returns early when asked to map
+onto itself — recursion guard</td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>WebCore/platform/graphics/WidthIterator.cpp</code></td>
+<td>U+2028/U+2029 normalised to LF to avoid layout corruption</td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>WTF/wtf/HashTable.h</code></td>
+<td>rehash sizes are <code>Checked&lt;unsigned&gt;</code>, so
+<code>bestTableSize</code>/<code>oldSize</code> arithmetic is
+overflow-checked</td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>WTF/wtf/WeakHashMap.h</code>,
+<code>WeakHashCountedSet.h</code></td>
+<td><code>isEmptyIgnoringNullReferences()</code> no longer reports empty
+for a map that holds only dead keys; <code>removeAll()</code> added</td>
+</tr>
+</tbody>
+</table>
+<h3 id="34-hardening-policy-and-non-page-surfaces">3.4 Hardening, policy
+and non-page surfaces</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>file</th>
+<th>what 23.0.1 adds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>23</td>
+<td><code>WebCore/css/CSSVariableReferenceValue.cpp</code> (3),
+<code>css/parser/CSSParser.cpp</code> (1),
+<code>CSSParserImpl.cpp</code> (3), <code>CSSSelectorParser.cpp</code>
+(4), <code>CSSVariableParser.cpp</code> (1),
+<code>style/StyleBuilder.cpp</code> (2)</td>
+<td><code>CRASH_IF_STACK_OVERFLOW</code> at 14 new sites — deep
+<code>var()</code>, selector and nesting recursion</td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>WTF/wtf/text/StringBuilder.cpp</code>, <code>.h</code></td>
+<td>WKC overflow path calls <code>CRASH_WITH_NO_MEMORY()</code> instead
+of <code>CRASH()</code>/<code>RELEASE_ASSERT</code>;
+<code>didOverflowWKC()</code> removed</td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>JavaScriptCore/heap/PreciseAllocation.cpp</code></td>
+<td>WKC: a null <code>MarkedSpace</code> gives
+<code>CRASH_WITH_NO_MEMORY()</code> instead of a dereference</td>
+</tr>
+<tr>
+<td>26</td>
+<td><code>WebCore/platform/graphics/freetype/FontCacheFreeType.cpp</code></td>
+<td><code>RELEASE_ASSERT</code> on the font pattern, face and
+last-resort pattern instead of using null</td>
+</tr>
+<tr>
+<td>27</td>
+<td><code>JavaScriptCore/inspector/ScriptArguments.cpp</code></td>
+<td>bounds-checked <code>getArgumentAtIndexAsString(size_t)</code>
+replaces the hand-rolled count check</td>
+</tr>
+<tr>
+<td>28</td>
+<td><code>WebDriver/Session.cpp</code>,
+<code>WebDriverService.cpp</code>, <code>CommandResult.cpp</code></td>
+<td>action-sequence parameters (<code>duration</code>,
+<code>origin</code>, <code>x</code>/<code>y</code>, <code>button</code>,
+<code>deltaX</code>/<code>deltaY</code>, <code>pointerType</code>,
+<code>id</code>, <code>actions</code>) are validated and rejected as
+<code>InvalidArgument</code>/<code>InvalidSelector</code></td>
+</tr>
+<tr>
+<td>29</td>
+<td><code>JavaScriptCore/runtime/ExceptionScope.h</code> et al.</td>
+<td><code>VMTraps::maybeNeedHandling(mask)</code> →
+<code>maybeNeedHandling()</code> (upstream 237503); item 18 calls the
+new form</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-what-it-means-for-a-1900-device">4. What it means for a 19.0.0
+device</h2>
+<ul>
+<li><strong>#2–#5 are a series, not four bugs.</strong> 19.0.0 lets a
+SMIL animation set an out-of-range filter parameter <em>and</em> has no
+bounds check where that parameter is used. Either half is enough
+protection in 23.0.1. SVG filters are reachable from any page and SMIL
+is enabled in the applet.</li>
+<li><strong>#6 is the cheapest entry</strong>: one CSS declaration, a
+length check, an out-of-range read past the end of a string buffer.</li>
+<li><strong>Most of the list produces reads.</strong> They enlarge the
+address-leak toolkit rather than handing over a write primitive.</li>
+<li><strong>#1 is theoretical on this hardware.</strong> It wants a
+&gt;1 GiB string; the browser runs out of page memory long before
+that.</li>
+<li><strong>Not reachable from page content</strong>: #27 (inspector),
+#28 (WebDriver service), #21/#22 (need hundreds of millions of
+entries).</li>
+</ul>
+<h2 id="5-what-is-not-in-this-list">5. What is <em>not</em> in this
+list</h2>
+<p>The remaining 281 semantic files were read as churn rather than
+fixes:</p>
+<ul>
+<li><code>WKCStd</code>/<code>WKCWTF</code> namespace migration and the
+<code>WKC_INTL</code> option gates (<code>useIntl</code>,
+Intl/Temporal/Date/URL-IDNA fallbacks);</li>
+<li>WKC memory-pressure, thread and long-loop peers
+(<code>wkcMemoryCheckMemoryAllocatablePeer</code>,
+<code>CRASH_IF_LONG_LOOP_DETECTED</code>, <code>ThreadSafeWeakPtr</code>
+plumbing in <code>RunLoop</code>);</li>
+<li>the Largest Contentful Paint feature (6 new files plus plumbing
+through <code>Element</code>, <code>Document</code>,
+<code>Performance</code>);</li>
+<li>focus-visible, vibration and Nintendo focus-event APIs;</li>
+<li>large layout and animation backports: <code>RenderGrid</code>
+(auto-repeat track handling), <code>FocusController</code>,
+<code>KeyframeEffect</code> transform-prefix matching,
+<code>TransformOperations</code>/<code>TransformationMatrix</code>
+accumulate, the inline layout overflow-break rework.</li>
+</ul>
+<p>Those backports are upstream <em>correctness</em> work from later
+WebKit branches. Some of them fix fuzz-found layout crashes, but none
+adds a bounds, lifetime or origin check, so they are not counted as a
+security delta.</p>
+<h2 id="6-limitations">6. Limitations</h2>
+<p>This is a semantic diff review, not a bisect against upstream. A
+backport that changes behaviour without adding a guard-shaped line — a
+type widening, a changed default, a reordered initialisation — would not
+be caught by the second sweep. Treat the list as high-recall for
+guard-shaped fixes and as <em>unverified</em> for anything
+structural.</p>
+<p>The comparison covers <code>webkit_3.6.8</code> against
+<code>webkit_3.12.11</code> only. The bundled WKC platform layer
+(<code>WKC_3.6.8</code> → <code>WKC_3.12.11</code>),
+<code>WebKitLibraries</code> and the legacy 601.7.4 tree were not part
+of this pass.</p>
+<h2 id="7-provenance">7. Provenance</h2>
+<table>
+<tbody>
+<tr>
+<td>19.0.0 drop</td>
+<td><code>NintendoSwitch2_OpenSources19.0.0.zip</code>, 145,843,601 B,
+sha256
+<code>b070fcf022c4c76cfaf90cd45cfde15243f360bec9461758eb3e6b8ecedb9d4f</code></td>
+</tr>
+<tr>
+<td>23.0.1 drop</td>
+<td><code>NintendoSwitch2_OpenSources23.0.1.zip</code>, 197,123,071 B,
+sha256
+<code>a2bcdfb7ec695d1ac5c790317a1239ccdb40e0ba8e052891c2ebba1314200f90</code></td>
+</tr>
+<tr>
+<td>source</td>
+<td><a
+href="https://support.nintendo.com/jp/oss/index.html">https://support.nintendo.com/jp/oss/index.html</a>
+(serves the index only with a browser User-Agent)</td>
+</tr>
+<tr>
+<td>artifacts</td>
+<td><a
+href="delta/fork-delta.json"><code>delta/fork-delta.json</code></a>
+(per-file classification), <a
+href="delta/fix-candidates.json"><code>delta/fix-candidates.json</code></a>
+(candidate lines)</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,734 @@
+[
+ {
+  "path": "JavaScriptCore/ChangeLog",
+  "changedLines": 42,
+  "added": [
+   {
+    "line": 4,
+    "text": "        https://bugs.webkit.org/show_bug.cgi?id=237503"
+   },
+   {
+    "line": 25,
+    "text": "        https://bugs.webkit.org/show_bug.cgi?id=238032"
+   }
+  ]
+ },
+ {
+  "path": "JavaScriptCore/runtime/ExceptionScope.h",
+  "changedLines": 4,
+  "added": [
+   {
+    "line": 113,
+    "text": "        if (UNLIKELY(vm.traps().maybeNeedHandling())) { \\"
+   }
+  ]
+ },
+ {
+  "path": "JavaScriptCore/runtime/JSCast.h",
+  "changedLines": 8,
+  "added": [
+   {
+    "line": 188,
+    "text": "    if (LIKELY(Dispatcher::inherits(vm, from)))"
+   }
+  ]
+ },
+ {
+  "path": "JavaScriptCore/runtime/JSGlobalObjectFunctions.cpp",
+  "changedLines": 99,
+  "added": [
+   {
+    "line": 1067,
+    "text": "    if (UNLIKELY(!localTM))"
+   },
+   {
+    "line": 1135,
+    "text": "            JSObject* originalToObject = originalOptions.toObject(globalObject);"
+   },
+   {
+    "line": 1137,
+    "text": "            options = constructEmptyObject(globalObject, originalToObject);"
+   }
+  ]
+ },
+ {
+  "path": "JavaScriptCore/runtime/JSModuleRecord.cpp",
+  "changedLines": 13,
+  "added": [
+   {
+    "line": 155,
+    "text": "        // rdar://107531050: Speculative crash mitigation"
+   },
+   {
+    "line": 156,
+    "text": "        if (UNLIKELY(importedModule == bitwise_cast<AbstractModuleRecord*>(encodedJSUndefined()))) {"
+   },
+   {
+    "line": 157,
+    "text": "            RELEASE_ASSERT(vm.exceptionForInspection(), vm.traps().maybeNeedHandling(), vm.exceptionForInspection(), importedModule);"
+   },
+   {
+    "line": 158,
+    "text": "            RELEASE_ASSERT(vm.traps().maybeNeedHandling(), vm.traps().maybeNeedHandling(), vm.exceptionForInspection(), importedModule);"
+   }
+  ]
+ },
+ {
+  "path": "JavaScriptCore/runtime/StringPrototype.cpp",
+  "changedLines": 22,
+  "added": [
+   {
+    "line": 1934,
+    "text": "    // rdar://160634825"
+   },
+   {
+    "line": 1935,
+    "text": "    // ICU isn't able to handle large strings due to buffer length calculations potentially overflowing."
+   }
+  ]
+ },
+ {
+  "path": "WTF/wtf/Assertions.h",
+  "changedLines": 13,
+  "added": [
+   {
+    "line": 298,
+    "text": "extern \"C\" WKC_PEER_API void wkcMemoryNotifyStackOverflowPeer(size_t margin, size_t consumption, void* currentStackTop, const char* file, int line, const char* function);"
+   },
+   {
+    "line": 304,
+    "text": "        wkcMemoryNotifyStackOverflowPeer((margin), __consumption, __stack_top, __FILE__, __LINE__, WTF_PRETTY_FUNCTION); \\"
+   }
+  ]
+ },
+ {
+  "path": "WTF/wtf/CheckedArithmetic.h",
+  "changedLines": 14,
+  "added": [
+   {
+    "line": 668,
+    "text": "    constexpr Checked(ResultOverflowedTag)"
+   },
+   {
+    "line": 695,
+    "text": "    template <typename U> constexpr Checked(const Checked<U, OverflowHandler>& rhs)"
+   }
+  ]
+ },
+ {
+  "path": "WTF/wtf/WeakHashMap.h",
+  "changedLines": 9,
+  "added": [
+   {
+    "line": 315,
+    "text": "        if (UNLIKELY(onlyContainsNullReferences))"
+   }
+  ]
+ },
+ {
+  "path": "WTF/wtf/text/StringBuilder.cpp",
+  "changedLines": 20,
+  "added": [
+   {
+    "line": 59,
+    "text": "    if (hasOverflowed())"
+   }
+  ]
+ },
+ {
+  "path": "WTF/wtf/text/StringBuilder.h",
+  "changedLines": 8,
+  "added": [
+   {
+    "line": 282,
+    "text": "    if (hasOverflowed())"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/ChangeLog",
+  "changedLines": 44,
+  "added": [
+   {
+    "line": 4,
+    "text": "        https://bugs.webkit.org/show_bug.cgi?id=238032"
+   },
+   {
+    "line": 339,
+    "text": "        https://bugs.webkit.org/show_bug.cgi?id=235294"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/Modules/indexeddb/IDBKey.cpp",
+  "changedLines": 4,
+  "added": [
+   {
+    "line": 54,
+    "text": "        return createInvalid();"
+   },
+   {
+    "line": 61,
+    "text": "        return createInvalid();"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/css/CSSGradientValue.cpp",
+  "changedLines": 10,
+  "added": [
+   {
+    "line": 506,
+    "text": "            // and [last-offset, maxExtent] ranges as well as likely exorbitant memory consumption"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/css/CSSStyleSheet.cpp",
+  "changedLines": 19,
+  "added": [
+   {
+    "line": 272,
+    "text": "        return Exception { ExceptionCode::SecurityError, \"Not allowed to insert rule into cross-origin stylesheet\"_s };"
+   },
+   {
+    "line": 299,
+    "text": "        return Exception { ExceptionCode::SecurityError, \"Not allowed to delete rule from cross-origin stylesheet\"_s };"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/css/CSSVariableReferenceValue.cpp",
+  "changedLines": 9,
+  "added": [
+   {
+    "line": 84,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   },
+   {
+    "line": 133,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   },
+   {
+    "line": 149,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/css/parser/CSSParser.cpp",
+  "changedLines": 3,
+  "added": [
+   {
+    "line": 181,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/css/parser/CSSParserImpl.cpp",
+  "changedLines": 9,
+  "added": [
+   {
+    "line": 370,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   },
+   {
+    "line": 425,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   },
+   {
+    "line": 645,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/css/parser/CSSSelectorParser.cpp",
+  "changedLines": 12,
+  "added": [
+   {
+    "line": 87,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   },
+   {
+    "line": 221,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   },
+   {
+    "line": 398,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   },
+   {
+    "line": 453,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/css/parser/CSSVariableParser.cpp",
+  "changedLines": 3,
+  "added": [
+   {
+    "line": 66,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/dom/Element.cpp",
+  "changedLines": 38,
+  "added": [
+   {
+    "line": 909,
+    "text": "    Style::PseudoClassChangeInvalidation focusStyleInvalidation(*this, CSSSelector::PseudoClassFocusVisible, value);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/html/HTMLCanvasElement.cpp",
+  "changedLines": 30,
+  "added": [
+   {
+    "line": 300,
+    "text": "        if (m_context) [[unlikely]]"
+   },
+   {
+    "line": 315,
+    "text": "        if (m_context) [[unlikely]]"
+   },
+   {
+    "line": 331,
+    "text": "        if (m_context) [[unlikely]]"
+   },
+   {
+    "line": 374,
+    "text": "    ASSERT_WITH_SECURITY_IMPLICATION(!m_context);"
+   },
+   {
+    "line": 452,
+    "text": "    ASSERT_WITH_SECURITY_IMPLICATION(!m_context);"
+   },
+   {
+    "line": 513,
+    "text": "    ASSERT_WITH_SECURITY_IMPLICATION(!m_context);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/layout/formattingContexts/inline/InlineContentBreaker.cpp",
+  "changedLines": 34,
+  "added": [
+   {
+    "line": 408,
+    "text": "                    // Since this is an overflowing content and we are allowed to break at arbitrary position, we really ought to find a breaking position."
+   },
+   {
+    "line": 410,
+    "text": "                    // FIXME: This should be merged with the \"let's keep the first character on the line\" logic (see in InlineContentBreaker::processOverflowingContent)"
+   },
+   {
+    "line": 532,
+    "text": "    auto partialOverflowingRun = tryBreakingTextRun(runs, { overflowingRunIndex, true, lineStatus.contentLogicalRight + nonOverflowingContentWidth }, availableWidth, lineStatus);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/layout/formattingContexts/inline/InlineLineBuilder.cpp",
+  "changedLines": 38,
+  "added": [
+   {
+    "line": 975,
+    "text": "        auto& overflowingRun = candidateRuns[*eligibleTrailingRunIndex];"
+   },
+   {
+    "line": 977,
+    "text": "        ASSERT(is<InlineTextItem>(overflowingRun.inlineItem));"
+   },
+   {
+    "line": 978,
+    "text": "        auto& inlineTextItem = downcast<InlineTextItem>(overflowingRun.inlineItem);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/loader/FrameLoader.cpp",
+  "changedLines": 12,
+  "added": [
+   {
+    "line": 1489,
+    "text": "    addSameSiteInfoToRequestIfNeeded(loader->request(), SecurityPolicy::shouldInheritSecurityOriginFromOwner(initiator->url()) ? nullptr : initiator.ptr());"
+   },
+   {
+    "line": 1511,
+    "text": "            // FIXME: This message should be moved off the console once a solution to https://bugs.webkit.org/show_bug.cgi?id=103274 exists."
+   },
+   {
+    "line": 1514,
+    "text": "                document->addConsoleMessage(MessageSource::Security, MessageLevel::Error, \"Blocked script execution in '\" + action.requester()->url.stringCenterEllipsizedToLength() + \"' because the document's frame is sandboxed and the 'allow-scripts' permission is not set.\");"
+   },
+   {
+    "line": 1516,
+    "text": "            m_frame.script().executeJavaScriptURL(request.url(), action.requester() ? action.requester()->securityOrigin.ptr() : nullptr, action.shouldReplaceDocumentIfJavaScriptURL());"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/loader/MediaResourceLoader.cpp",
+  "changedLines": 4,
+  "added": [
+   {
+    "line": 121,
+    "text": "    if (!m_document->securityOrigin().isSameOriginAs(SecurityOrigin::create(request.url())) && m_crossOriginMode.isNull() && m_wasMainResourceLoaded)"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/loader/NavigationRequester.h",
+  "changedLines": 19,
+  "added": [
+   {
+    "line": 30,
+    "text": "#include \"SecurityContext.h\""
+   },
+   {
+    "line": 56,
+    "text": "    encoder << url << securityOrigin.get() << topOrigin.get() << crossOriginOpenerPolicy << documentIdentifier << globalFrameIdentifier << sandboxFlags;"
+   },
+   {
+    "line": 95,
+    "text": "    return NavigationRequester { WTFMove(*url), securityOrigin.releaseNonNull(), topOrigin.releaseNonNull(), WTFMove(*crossOriginOpenerPolicy), *documentIdentifier, *globalFrameIdentifier, *sandboxFlags };"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/loader/PingLoader.cpp",
+  "changedLines": 2,
+  "added": [
+   {
+    "line": 135,
+    "text": "    if (!document.contentSecurityPolicy()->allowConnectToSource(pingURL))"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/platform/graphics/filters/software/FEDisplacementMapSoftwareApplier.cpp",
+  "changedLines": 9,
+  "added": [
+   {
+    "line": 57,
+    "text": "    // return an index outside [0, 3] below, causing an out-of-bounds read from the displacement pixel buffer."
+   }
+  ]
+ },
+ {
+  "path": "WebCore/platform/graphics/freetype/FontCacheFreeType.cpp",
+  "changedLines": 125,
+  "added": [
+   {
+    "line": 168,
+    "text": "            RELEASE_ASSERT(pattern);"
+   },
+   {
+    "line": 193,
+    "text": "            RELEASE_ASSERT(face);"
+   },
+   {
+    "line": 234,
+    "text": "            RELEASE_ASSERT(m_lastResortFontPattern.pattern);"
+   },
+   {
+    "line": 337,
+    "text": "        RELEASE_ASSERT(addResult.iterator->value);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/rendering/RenderDeprecatedFlexibleBox.cpp",
+  "changedLines": 5,
+  "added": [
+   {
+    "line": 190,
+    "text": "    if (oldStyle && !oldStyle->lineClamp().isNone() || !newStyle.lineClamp().isNone())"
+   },
+   {
+    "line": 191,
+    "text": "        clearLineClamp();"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/rendering/RenderLayer.cpp",
+  "changedLines": 8,
+  "added": [
+   {
+    "line": 3300,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/style/StyleBuilder.cpp",
+  "changedLines": 6,
+  "added": [
+   {
+    "line": 178,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   },
+   {
+    "line": 379,
+    "text": "    CRASH_IF_STACK_OVERFLOW(WKC_STACK_MARGIN_DEFAULT);"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/svg/SVGFEConvolveMatrixElement.cpp",
+  "changedLines": 45,
+  "added": [
+   {
+    "line": 177,
+    "text": "bool SVGFEConvolveMatrixElement::isValidTargetXOffset() const"
+   },
+   {
+    "line": 184,
+    "text": "bool SVGFEConvolveMatrixElement::isValidTargetYOffset() const"
+   },
+   {
+    "line": 194,
+    "text": "    if ((attrName == SVGNames::targetXAttr || attrName == SVGNames::orderAttr) && !isValidTargetXOffset()) {"
+   },
+   {
+    "line": 195,
+    "text": "        InstanceInvalidationGuard guard(*this);"
+   },
+   {
+    "line": 200,
+    "text": "    if ((attrName == SVGNames::targetYAttr || attrName == SVGNames::orderAttr) && !isValidTargetYOffset()) {"
+   },
+   {
+    "line": 201,
+    "text": "        InstanceInvalidationGuard guard(*this);"
+   },
+   {
+    "line": 244,
+    "text": "    if (!isValidTargetXOffset())"
+   },
+   {
+    "line": 247,
+    "text": "    if (!isValidTargetYOffset())"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/svg/SVGFEConvolveMatrixElement.h",
+  "changedLines": 2,
+  "added": [
+   {
+    "line": 105,
+    "text": "    bool isValidTargetXOffset() const;"
+   },
+   {
+    "line": 106,
+    "text": "    bool isValidTargetYOffset() const;"
+   }
+  ]
+ },
+ {
+  "path": "WebCore/svg/properties/SVGAnimationDiscreteFunction.h",
+  "changedLines": 9,
+  "added": [
+   {
+    "line": 60,
+    "text": "    // Value-initialize so that, if a derived class's setFromAndToValues() ever rejects an invalid"
+   }
+  ]
+ },
+ {
+  "path": "WebDriver/CommandResult.cpp",
+  "changedLines": 106,
+  "added": [
+   {
+    "line": 89,
+    "text": "        else if (errorName == \"InvalidArgument\")"
+   },
+   {
+    "line": 90,
+    "text": "            m_errorCode = ErrorCode::InvalidArgument;"
+   },
+   {
+    "line": 91,
+    "text": "        else if (errorName == \"InvalidCookieDomain\")"
+   },
+   {
+    "line": 92,
+    "text": "            m_errorCode = ErrorCode::InvalidCookieDomain;"
+   },
+   {
+    "line": 93,
+    "text": "        else if (errorName == \"InvalidElementState\")"
+   },
+   {
+    "line": 94,
+    "text": "            m_errorCode = ErrorCode::InvalidElementState;"
+   },
+   {
+    "line": 95,
+    "text": "        else if (errorName == \"InvalidSelector\")"
+   },
+   {
+    "line": 96,
+    "text": "            m_errorCode = ErrorCode::InvalidSelector;"
+   },
+   {
+    "line": 97,
+    "text": "        else if (errorName == \"InvalidSessionID\")"
+   },
+   {
+    "line": 98,
+    "text": "            m_errorCode = ErrorCode::InvalidSessionID;"
+   },
+   {
+    "line": 205,
+    "text": "    case ErrorCode::InvalidCookieDomain:"
+   },
+   {
+    "line": 268,
+    "text": "    case ErrorCode::InvalidCookieDomain:"
+   },
+   {
+    "line": 269,
+    "text": "        return \"invalid cookie domain\"_s;"
+   }
+  ]
+ },
+ {
+  "path": "WebDriver/CommandResult.h",
+  "changedLines": 20,
+  "added": [
+   {
+    "line": 49,
+    "text": "        InvalidCookieDomain,"
+   }
+  ]
+ },
+ {
+  "path": "WebDriver/Session.cpp",
+  "changedLines": 114,
+  "added": [
+   {
+    "line": 2667,
+    "text": "    RELEASE_ASSERT_NOT_REACHED();"
+   },
+   {
+    "line": 2690,
+    "text": "    RELEASE_ASSERT_NOT_REACHED();"
+   },
+   {
+    "line": 2702,
+    "text": "    RELEASE_ASSERT_NOT_REACHED();"
+   },
+   {
+    "line": 2762,
+    "text": "                            return completionHandler(CommandResult::fail(CommandResult::ErrorCode::InvalidArgument, \"Pointer up action must have button coordinates.\"_s));"
+   },
+   {
+    "line": 2771,
+    "text": "                            return completionHandler(CommandResult::fail(CommandResult::ErrorCode::InvalidArgument, \"Pointer down action must have button coordinates.\"_s));"
+   },
+   {
+    "line": 2779,
+    "text": "                            return completionHandler(CommandResult::fail(CommandResult::ErrorCode::InvalidArgument, \"Pointer move action must have x and y coordinates.\"_s));"
+   },
+   {
+    "line": 2796,
+    "text": "                            return completionHandler(CommandResult::fail(CommandResult::ErrorCode::InvalidArgument, \"Pointer down action must have button coordinates.\"_s));"
+   },
+   {
+    "line": 2876,
+    "text": "                            return completionHandler(CommandResult::fail(CommandResult::ErrorCode::InvalidArgument, \"Scroll action must have x and y coordinates.\"_s));"
+   },
+   {
+    "line": 2878,
+    "text": "                            return completionHandler(CommandResult::fail(CommandResult::ErrorCode::InvalidArgument, \"Scroll action must have deltaX and deltaY values.\"_s));"
+   }
+  ]
+ },
+ {
+  "path": "WebDriver/WebDriverService.cpp",
+  "changedLines": 75,
+  "added": [
+   {
+    "line": 1852,
+    "text": "        errorMessage = String(\"The 'duration' parameter for the pause action is invalid\"_s);"
+   },
+   {
+    "line": 1864,
+    "text": "        errorMessage = String(\"The 'type' parameter for the null action is invalid or missing\"_s);"
+   },
+   {
+    "line": 1886,
+    "text": "        errorMessage = String(\"The 'type' parameter for the key action is invalid\"_s);"
+   },
+   {
+    "line": 1906,
+    "text": "            errorMessage = String(\"The 'value' parameter for the key up/down action is invalid\"_s);"
+   },
+   {
+    "line": 1947,
+    "text": "            errorMessage = String(\"The 'duration' parameter for the action is invalid\"_s);"
+   },
+   {
+    "line": 1968,
+    "text": "                errorMessage = String(\"The 'origin' parameter for the action is invalid\"_s);"
+   },
+   {
+    "line": 1978,
+    "text": "            errorMessage = String(\"The 'x' parameter for the action is invalid\"_s);"
+   },
+   {
+    "line": 1990,
+    "text": "            errorMessage = String(\"The 'y' parameter for the action is invalid\"_s);"
+   },
+   {
+    "line": 2017,
+    "text": "        errorMessage = String(\"The 'type' parameter for the pointer action is invalid\"_s);"
+   },
+   {
+    "line": 2038,
+    "text": "            errorMessage = String(\"The 'button' parameter for the pointer up/down action is invalid\"_s);"
+   },
+   {
+    "line": 2068,
+    "text": "        errorMessage = String(\"The 'type' parameter for the wheel action is invalid\"_s);"
+   },
+   {
+    "line": 2086,
+    "text": "                errorMessage = String(\"The 'deltaX' parameter for the action is invalid\"_s);"
+   },
+   {
+    "line": 2098,
+    "text": "                errorMessage = String(\"The 'deltaY' parameter for the action is invalid\"_s);"
+   },
+   {
+    "line": 2144,
+    "text": "        errorMessage = String(\"The 'pointerType' parameter in the pointer parameters of the action sequence is invalid\"_s);"
+   },
+   {
+    "line": 2170,
+    "text": "        errorMessage = String(\"The 'type' parameter in the action sequence is invalid or missing\"_s);"
+   },
+   {
+    "line": 2176,
+    "text": "        errorMessage = String(\"The 'id' parameter in the action sequence is invalid or missing\"_s);"
+   },
+   {
+    "line": 2203,
+    "text": "        errorMessage = String(\"The 'actions' parameter in the action sequence is invalid or not present\"_s);"
+   },
+   {
+    "line": 2243,
+    "text": "        completionHandler(CommandResult::fail(CommandResult::ErrorCode::InvalidArgument, String(\"The 'actions' parameter is invalid or not present\"_s)));"
+   }
+  ]
+ }
+]

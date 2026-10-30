@@ -11,10 +11,15 @@ Docker, under `qemu-user`, with JIT disabled:
    `SystemUpdate 23.0.0` open-source release, grafted onto the upstream 613.3.9
    build system so it can be compiled and run outside the console.
 
+A third document compares the vendor tree against the launch-day one
+(`webkit_3.6.8`, `SystemUpdate 19.0.0`) and lists what 23.0.1 fixed that 19.0.0
+never got.
+
 | document | what it covers |
 |---|---|
 | [VM-SETUP.md](VM-SETUP.md) | upstream VM: build, qemu-user run path, test families, gdb, pitfalls, smoke test |
 | [NINTENDO-BUILD.md](NINTENDO-BUILD.md) | vendor build: what the drop contains, the graft, the 11-file build patch, build and tests |
+| [FIX-DELTA.md](FIX-DELTA.md) ([rendered](FIX-DELTA.html)) | source audit: 533 differing files, **29 fixes** in `webkit_3.12.11` (23.0.1) that are absent from `webkit_3.6.8` (19.0.0) |
 
 ## Layout
 
@@ -22,12 +27,23 @@ Docker, under `qemu-user`, with JIT disabled:
 vm/           Dockerfiles (release, DeferGC control, debug) + repro/gdb scripts
 nintendo/     Dockerfile, graft.sh, patches/0001-build-shims.patch,
               upstream/ (613.3.9 cmake/bmalloc/gtest scaffolding), smoke tests
+delta/        compare-forks.py, fix-candidates.py, and their recorded output
+              (fork-delta.json, fix-candidates.json)
+FIX-DELTA.*   the audit: Markdown source, rendered HTML, pandoc header
 ```
 
 The vendor modules (`webkit_3.12.11/{JavaScriptCore,WTF}`) are **not** in this
 repository; see NINTENDO-BUILD.md §2. Neither are the research harnesses
 (`oss/vm/`, `ns2jb-webkit/`, the scratch scripts in `/tmp/opencode/`); the
 documents give their contents where needed.
+
+The HTML copy of the audit is generated, not hand-edited:
+
+```sh
+pandoc FIX-DELTA.md -f gfm -t html5 -s \
+  --metadata pagetitle="WebKit fork delta: 23.0.1 fixes absent from 19.0.0" \
+  --metadata lang=en -H FIX-DELTA.header.html -o FIX-DELTA.html
+```
 
 ## Quick start — upstream
 

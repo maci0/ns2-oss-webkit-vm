@@ -1,0 +1,2667 @@
+[
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/API/glib/JSCVirtualMachine.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/API/tests/MultithreadedMultiVMExecutionTest.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 42,
+  "path": "JavaScriptCore/ChangeLog"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/assembler/AbstractMacroAssembler.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "JavaScriptCore/assembler/AssemblerBuffer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/assembler/CPU.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "JavaScriptCore/assembler/JITOperationList.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/assembler/LinkBuffer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/assembler/MacroAssemblerARM64.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/assembler/MacroAssemblerX86Common.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/assembler/PerfLog.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/dfg/DFGCommonData.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/dfg/DFGDriver.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/dfg/DFGTierUpCheckInjectionPhase.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/disassembler/Disassembler.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/heap/Heap.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/heap/HeapHelperPool.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/heap/MachineStackMarker.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/heap/MarkedSpace.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "JavaScriptCore/heap/PreciseAllocation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 38,
+  "path": "JavaScriptCore/inspector/ScriptArguments.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "JavaScriptCore/inspector/ScriptArguments.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "JavaScriptCore/inspector/remote/RemoteInspector.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "JavaScriptCore/inspector/remote/glib/RemoteInspectorGlib.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 10,
+  "path": "JavaScriptCore/inspector/remote/socket/RemoteInspectorConnectionClient.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "JavaScriptCore/inspector/remote/socket/RemoteInspectorMessageParser.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/inspector/remote/socket/RemoteInspectorServer.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 52,
+  "path": "JavaScriptCore/inspector/remote/socket/RemoteInspectorSocket.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "JavaScriptCore/inspector/remote/socket/RemoteInspectorSocket.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/inspector/remote/socket/RemoteInspectorSocketEndpoint.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/inspector/remote/socket/win/RemoteInspectorSocketWin.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 9,
+  "path": "JavaScriptCore/inspector/scripts/codegen/generator.py"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/interpreter/CallFrame.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "JavaScriptCore/interpreter/Interpreter.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "JavaScriptCore/jit/ExecutableAllocationFuzz.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/jit/ExecutableAllocator.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/jit/JITWorklist.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "JavaScriptCore/jit/RegisterAtOffsetList.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/jit/RegisterSet.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "JavaScriptCore/jsc.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 40,
+  "path": "JavaScriptCore/llint/LLIntEntrypoint.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/llint/LLIntSlowPaths.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 144,
+  "path": "JavaScriptCore/llint/LLIntThunks.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "JavaScriptCore/llint/LowLevelInterpreter.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "JavaScriptCore/parser/Parser.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/parser/SourceProvider.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/profiler/ProfilerUID.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/runtime/ArrayBuffer.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "JavaScriptCore/runtime/BigIntPrototype.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/runtime/ConfigFile.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "JavaScriptCore/runtime/ExceptionScope.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/runtime/FuzzerPredictions.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "JavaScriptCore/runtime/ISO8601.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/runtime/InitializeThreading.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 36,
+  "path": "JavaScriptCore/runtime/IntlObject.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "JavaScriptCore/runtime/JSCast.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 28,
+  "path": "JavaScriptCore/runtime/JSDateMath.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 244,
+  "path": "JavaScriptCore/runtime/JSGlobalObject.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 99,
+  "path": "JavaScriptCore/runtime/JSGlobalObjectFunctions.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/runtime/JSLock.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 13,
+  "path": "JavaScriptCore/runtime/JSModuleRecord.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/runtime/JSRunLoopTimer.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "JavaScriptCore/runtime/NativeFunction.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "JavaScriptCore/runtime/NumberPrototype.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/runtime/Options.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "JavaScriptCore/runtime/OptionsList.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 22,
+  "path": "JavaScriptCore/runtime/StringPrototype.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "JavaScriptCore/runtime/TemporalDuration.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 7,
+  "path": "JavaScriptCore/runtime/TemporalInstantPrototype.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "JavaScriptCore/runtime/TemporalNow.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 36,
+  "path": "JavaScriptCore/runtime/TemporalObject.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 12,
+  "path": "JavaScriptCore/runtime/VM.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "JavaScriptCore/runtime/VM.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/runtime/VMTraps.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "JavaScriptCore/runtime/VMTraps.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/tools/FunctionOverrides.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/tools/SigillCrashAnalyzer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/tools/VMInspector.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/wasm/WasmB3IRGenerator.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/wasm/WasmCallee.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "JavaScriptCore/wasm/WasmCallingConvention.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "JavaScriptCore/wasm/WasmFaultSignalHandler.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/wasm/WasmLLIntGenerator.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/wasm/WasmMachineThreads.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/wasm/WasmMemory.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/wasm/WasmMemoryInformation.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 2,
+  "path": "JavaScriptCore/wasm/WasmSignature.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 2,
+  "path": "JavaScriptCore/wasm/WasmSignature.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 2,
+  "path": "JavaScriptCore/wasm/WasmSignatureInlines.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "JavaScriptCore/wasm/WasmWorklist.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 16,
+  "path": "WTF/Scripts/Preferences/WebPreferencesInternal.yaml"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/Assertions.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 13,
+  "path": "WTF/wtf/Assertions.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WTF/wtf/Atomics.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 14,
+  "path": "WTF/wtf/CheckedArithmetic.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/CryptographicallyRandomNumber.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/CurrentTime.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/DataLog.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/DebugHeap.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WTF/wtf/FastMalloc.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 14,
+  "path": "WTF/wtf/HashTable.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/Identified.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/Language.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WTF/wtf/Lock.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WTF/wtf/Lock.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/Logger.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/MainThread.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/MemoryPressureHandler.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/OSRandomSource.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/ObjectIdentifier.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WTF/wtf/PageBlock.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/ParkingLot.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WTF/wtf/Platform.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WTF/wtf/PlatformUse.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WTF/wtf/RAMSize.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/RunLoop.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WTF/wtf/RunLoop.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/StackShotProfiler.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WTF/wtf/StdLibExtras.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 12,
+  "path": "WTF/wtf/Threading.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/TranslatedProcess.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 17,
+  "path": "WTF/wtf/URL.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 22,
+  "path": "WTF/wtf/URLHelpers.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 22,
+  "path": "WTF/wtf/URLParser.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WTF/wtf/URLParser.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WTF/wtf/UUID.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WTF/wtf/WTFConfig.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 22,
+  "path": "WTF/wtf/WeakHashCountedSet.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 9,
+  "path": "WTF/wtf/WeakHashMap.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 21,
+  "path": "WTF/wtf/WordLock.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WTF/wtf/WorkQueue.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WTF/wtf/WorkQueue.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 39,
+  "path": "WTF/wtf/generic/RunLoopGeneric.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/glib/ChassisType.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/linux/RealTimeThreads.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/text/AtomString.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/text/LineBreakIteratorPoolICU.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 20,
+  "path": "WTF/wtf/text/StringBuilder.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WTF/wtf/text/StringBuilder.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WTF/wtf/text/StringBuilderInternals.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 110,
+  "path": "WTF/wtf/text/TextBreakIterator.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 17,
+  "path": "WTF/wtf/text/TextBreakIterator.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 12,
+  "path": "WTF/wtf/threads/Signals.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WTF/wtf/unicode/Collator.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 42,
+  "path": "WTF/wtf/unicode/icu/CollatorICU.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 16,
+  "path": "WTF/wtf/unicode/icu/ICUHelpers.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WTF/wtf/unicode/icu/ICUHelpers.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/win/DbgHelperWin.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WTF/wtf/win/FileSystemWin.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WTF/wtf/win/RunLoopWin.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 44,
+  "path": "WebCore/ChangeLog"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/DerivedSources.make"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/Modules/encryptedmedia/legacy/LegacyCDM.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/Modules/gamepad/NavigatorGamepad.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/Modules/indexeddb/IDBKey.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 11,
+  "path": "WebCore/Modules/indexeddb/WindowOrWorkerGlobalScopeIndexedDatabase.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 217,
+  "path": "WebCore/Modules/indexeddb/server/IDBServer.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/Modules/indexeddb/server/IDBServer.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 23,
+  "path": "WebCore/Modules/indexeddb/server/SQLiteIDBBackingStore.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WebCore/Modules/indexeddb/shared/IDBResourceIdentifier.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/Modules/mediastream/RTCDataChannel.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/Modules/webaudio/AudioNode.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/Modules/webdatabase/Database.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/PAL/pal/crypto/tasn1/Utilities.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 46,
+  "path": "WebCore/PAL/pal/text/EncodingTables.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/PAL/pal/text/TextCodec.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 16,
+  "path": "WebCore/PAL/pal/text/TextCodecCJK.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/PAL/pal/text/TextCodecICU.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/PAL/pal/text/TextCodecSingleByte.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 19,
+  "path": "WebCore/PAL/pal/text/TextEncodingRegistry.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 36,
+  "path": "WebCore/accessibility/AXObjectCache.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/accessibility/AXObjectCache.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 18,
+  "path": "WebCore/accessibility/AccessibilityNodeObject.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 9,
+  "path": "WebCore/accessibility/AccessibilityObject.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/accessibility/AccessibilityObject.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 32,
+  "path": "WebCore/accessibility/AccessibilityObjectInterface.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/animation/AnimationEffect.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/animation/CSSPropertyAnimation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/animation/CSSPropertyBlendingClient.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 203,
+  "path": "WebCore/animation/KeyframeEffect.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 20,
+  "path": "WebCore/animation/KeyframeEffect.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 14,
+  "path": "WebCore/animation/KeyframeEffectStack.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/animation/KeyframeEffectStack.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/animation/WebAnimation.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/bindings/js/GCController.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 6,
+  "path": "WebCore/bindings/js/IDBBindingUtilities.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/bindings/js/JSCustomEventCustom.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/bindings/js/JSHistoryCustom.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/bindings/js/JSIDBCursorCustom.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/bindings/js/JSIDBCursorWithValueCustom.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/bindings/js/JSIDBRequestCustom.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/bindings/js/JSMessageEventCustom.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/bindings/js/JSPaymentMethodChangeEventCustom.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/bindings/js/JSPaymentResponseCustom.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/bindings/js/JSPerformanceEntryCustom.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 9,
+  "path": "WebCore/bindings/js/JSValueInWrappedObject.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/bindings/js/JSWebXRRigidTransformCustom.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/bindings/js/JSWebXRViewCustom.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/bindings/js/WebCoreBuiltinNames.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/bindings/js/WebCoreJITOperations.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/crypto/CryptoAlgorithmRegistry.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 10,
+  "path": "WebCore/css/CSSGradientValue.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/css/CSSImportRule.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 19,
+  "path": "WebCore/css/CSSStyleSheet.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/css/CSSStyleSheet.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/css/CSSValuePool.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 9,
+  "path": "WebCore/css/CSSVariableReferenceValue.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/css/parser/CSSParser.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 71,
+  "path": "WebCore/css/parser/CSSParserFastPaths.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 9,
+  "path": "WebCore/css/parser/CSSParserImpl.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebCore/css/parser/CSSSelectorParser.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/css/parser/CSSVariableParser.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 126,
+  "path": "WebCore/dom/Document.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 24,
+  "path": "WebCore/dom/Document.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/dom/DocumentFontLoader.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/dom/DocumentFontLoader.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 38,
+  "path": "WebCore/dom/Element.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 11,
+  "path": "WebCore/dom/Element.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/dom/ElementRareData.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/dom/ElementRareData.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/dom/EventNames.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/dom/FullscreenManager.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 14,
+  "path": "WebCore/dom/Node.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 11,
+  "path": "WebCore/dom/Node.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 7,
+  "path": "WebCore/dom/PointerEvent.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/dom/ProcessingInstruction.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/dom/TextDecoder.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/dom/messageports/MessagePortChannelProvider.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/editing/Editing.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/editing/markup.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/fileapi/AsyncFileStream.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/fileapi/ThreadableBlobRegistry.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/history/BackForwardCache.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 30,
+  "path": "WebCore/html/HTMLCanvasElement.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 7,
+  "path": "WebCore/html/HTMLFormControlElement.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 7,
+  "path": "WebCore/html/HTMLLinkElement.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WebCore/html/HTMLMediaElement.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/html/HTMLTrackElement.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/html/HTMLVideoElement.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WebCore/html/MediaElementSession.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/html/canvas/CanvasRenderingContext2DBase.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 41,
+  "path": "WebCore/html/track/VTTRegion.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/inspector/NetworkResourcesData.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 18,
+  "path": "WebCore/inspector/agents/InspectorCSSAgent.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/inspector/agents/InspectorIndexedDBAgent.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 24,
+  "path": "WebCore/inspector/agents/InspectorNetworkAgent.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 34,
+  "path": "WebCore/layout/formattingContexts/inline/InlineContentBreaker.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/layout/formattingContexts/inline/InlineContentBreaker.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/layout/formattingContexts/inline/InlineLineBoxBuilder.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 38,
+  "path": "WebCore/layout/formattingContexts/inline/InlineLineBuilder.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 7,
+  "path": "WebCore/layout/formattingContexts/inline/InlineLineBuilder.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 30,
+  "path": "WebCore/layout/formattingContexts/inline/text/TextUtil.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 14,
+  "path": "WebCore/layout/integration/InlineIteratorBox.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebCore/layout/integration/InlineIteratorBox.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WebCore/layout/integration/InlineIteratorBoxLegacyPath.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 7,
+  "path": "WebCore/layout/integration/InlineIteratorBoxModernPath.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/layout/integration/LayoutIntegrationCoverage.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/loader/EmptyClients.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/loader/EmptyClients.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebCore/loader/FrameLoader.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/loader/MediaResourceLoader.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/loader/MediaResourceLoader.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/loader/NavigationRequester.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 19,
+  "path": "WebCore/loader/NavigationRequester.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/loader/PingLoader.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/loader/ResourceLoader.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/loader/cache/CachedImage.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/loader/cache/CachedImage.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 101,
+  "path": "WebCore/loader/cache/CachedResource.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebCore/loader/cache/CachedResource.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 149,
+  "path": "WebCore/loader/cache/CachedScript.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/loader/cache/CachedScript.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/loader/cache/MemoryCache.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/page/ChromeClient.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WebCore/page/DOMWindow.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/page/DOMWindow.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 7,
+  "path": "WebCore/page/EventHandler.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 260,
+  "path": "WebCore/page/FocusController.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/page/FocusController.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 10,
+  "path": "WebCore/page/FrameView.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 15,
+  "path": "WebCore/page/FrameViewLayoutContext.cpp"
+ },
+ {
+  "status": "only-new",
+  "changedLines": 0,
+  "path": "WebCore/page/LargestContentfulPaint.cpp"
+ },
+ {
+  "status": "only-new",
+  "changedLines": 0,
+  "path": "WebCore/page/LargestContentfulPaint.h"
+ },
+ {
+  "status": "only-new",
+  "changedLines": 0,
+  "path": "WebCore/page/LargestContentfulPaint.idl"
+ },
+ {
+  "status": "only-new",
+  "changedLines": 0,
+  "path": "WebCore/page/LargestContentfulPaintData.cpp"
+ },
+ {
+  "status": "only-new",
+  "changedLines": 0,
+  "path": "WebCore/page/LargestContentfulPaintData.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 30,
+  "path": "WebCore/page/Navigator.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/page/Navigator.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WebCore/page/NavigatorBase.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 20,
+  "path": "WebCore/page/Page.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 41,
+  "path": "WebCore/page/Page.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 22,
+  "path": "WebCore/page/PageConsoleClient.cpp"
+ },
+ {
+  "status": "only-new",
+  "changedLines": 0,
+  "path": "WebCore/page/PaintTimingMixin.idl"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 20,
+  "path": "WebCore/page/Performance.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WebCore/page/Performance.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/page/PerformanceEntry.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 11,
+  "path": "WebCore/page/PerformanceEntry.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/page/PerformanceObserver.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/page/PerformanceResourceTiming.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/page/PointerCaptureController.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/page/PointerCaptureController.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 41,
+  "path": "WebCore/page/csp/ContentSecurityPolicySource.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/page/csp/ContentSecurityPolicySourceList.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/page/linux/ResourceUsageThreadLinux.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/page/scrolling/ScrollingThread.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/platform/Logging.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/MIMETypeRegistry.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/ProcessIdentifier.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 10,
+  "path": "WebCore/platform/animation/Animation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebCore/platform/animation/Animation.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/platform/audio/AudioResamplerKernel.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 22,
+  "path": "WebCore/platform/audio/HRTFDatabaseLoader.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/platform/audio/HRTFDatabaseLoader.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/audio/HRTFElevation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 14,
+  "path": "WebCore/platform/audio/PlatformMediaSessionManager.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 7,
+  "path": "WebCore/platform/audio/PlatformMediaSessionManager.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/platform/audio/cocoa/MediaSessionManagerCocoa.mm"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WebCore/platform/audio/gstreamer/AudioDestinationGStreamer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/audio/gstreamer/AudioFileReaderGStreamer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/audio/gstreamer/AudioSourceProviderGStreamer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/cocoa/TelephoneNumberDetectorCocoa.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/encryptedmedia/CDMFactory.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/platform/graphics/BitmapImage.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/ComplexTextController.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/DestinationColorSpace.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebCore/platform/graphics/Font.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 7,
+  "path": "WebCore/platform/graphics/Font.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebCore/platform/graphics/FontCache.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/platform/graphics/FontCache.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebCore/platform/graphics/FontCascade.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/FontCascadeFonts.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/FontGenericFamilies.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 14,
+  "path": "WebCore/platform/graphics/FontPlatformData.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/platform/graphics/GeneratedImage.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 75,
+  "path": "WebCore/platform/graphics/GraphicsLayer.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 7,
+  "path": "WebCore/platform/graphics/GraphicsLayer.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/platform/graphics/Image.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/ImageDecoder.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 15,
+  "path": "WebCore/platform/graphics/ImageSource.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/PlatformDisplay.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WebCore/platform/graphics/WidthIterator.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/avfoundation/CDMFairPlayStreaming.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 64,
+  "path": "WebCore/platform/graphics/ca/GraphicsLayerCA.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/ca/GraphicsLayerCA.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 13,
+  "path": "WebCore/platform/graphics/cairo/CairoOperations.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/cairo/CairoOperations.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 26,
+  "path": "WebCore/platform/graphics/cairo/CairoUtilities.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/cairo/CairoUtilities.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/cairo/FontCairo.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/cairo/FontCairoHarfbuzzNG.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 14,
+  "path": "WebCore/platform/graphics/cairo/FontCustomPlatformData.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 18,
+  "path": "WebCore/platform/graphics/cairo/GraphicsContextCairo.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/cairo/ImageBufferCairoBackend.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 12,
+  "path": "WebCore/platform/graphics/cg/ColorCG.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WebCore/platform/graphics/cg/ColorSpaceCG.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/cg/IOSurfacePool.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/cg/ImageBufferUtilitiesCG.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/cg/ImageUtilitiesCG.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/platform/graphics/cg/PDFDocumentImage.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/cg/SubimageCacheWithTimer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/coretext/FontCascadeCoreText.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/platform/graphics/filters/FEConvolveMatrix.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/platform/graphics/filters/software/FEConvolveMatrixSoftwareApplier.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/filters/software/FEConvolveMatrixSoftwareApplier.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 9,
+  "path": "WebCore/platform/graphics/filters/software/FEDisplacementMapSoftwareApplier.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 125,
+  "path": "WebCore/platform/graphics/freetype/FontCacheFreeType.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 25,
+  "path": "WebCore/platform/graphics/freetype/FontCustomPlatformDataFreeType.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WebCore/platform/graphics/freetype/FontPlatformDataFreeType.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WebCore/platform/graphics/freetype/GlyphPageTreeNodeFreeType.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 14,
+  "path": "WebCore/platform/graphics/freetype/SimpleFontDataFreeType.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WebCore/platform/graphics/gstreamer/GStreamerCommon.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/gstreamer/GStreamerVideoFrameHolder.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/gstreamer/ImageDecoderGStreamer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 12,
+  "path": "WebCore/platform/graphics/gstreamer/VideoFrameMetadataGStreamer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WebCore/platform/graphics/gstreamer/eme/CDMThunder.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/gstreamer/mse/AppendPipeline.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/gstreamer/mse/AppendPipeline.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/gstreamer/mse/SourceBufferPrivateGStreamer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/gtk/GdkCairoUtilities.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 11,
+  "path": "WebCore/platform/graphics/harfbuzz/ComplexTextControllerHarfBuzz.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WebCore/platform/graphics/harfbuzz/DrawGlyphsRecorderHarfBuzz.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/harfbuzz/FontDescriptionHarfBuzz.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/platform/graphics/nicosia/NicosiaAnimation.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/platform/graphics/nicosia/cairo/NicosiaCairoOperationRecorder.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/opengl/GraphicsContextGLOpenGL.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 9,
+  "path": "WebCore/platform/graphics/texmap/GraphicsLayerTextureMapper.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/texmap/TextureMapperContextAttributes.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 10,
+  "path": "WebCore/platform/graphics/texmap/coordinated/CoordinatedGraphicsLayer.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/transforms/Matrix3DTransformOperation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/transforms/MatrixTransformOperation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/transforms/PerspectiveTransformOperation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 15,
+  "path": "WebCore/platform/graphics/transforms/RotateTransformOperation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/transforms/RotateTransformOperation.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 15,
+  "path": "WebCore/platform/graphics/transforms/ScaleTransformOperation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/transforms/ScaleTransformOperation.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 11,
+  "path": "WebCore/platform/graphics/transforms/SkewTransformOperation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 27,
+  "path": "WebCore/platform/graphics/transforms/TransformOperation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/transforms/TransformOperation.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 120,
+  "path": "WebCore/platform/graphics/transforms/TransformOperations.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 50,
+  "path": "WebCore/platform/graphics/transforms/TransformOperations.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 77,
+  "path": "WebCore/platform/graphics/transforms/TransformationMatrix.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 9,
+  "path": "WebCore/platform/graphics/transforms/TranslateTransformOperation.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/graphics/transforms/TranslateTransformOperation.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/graphics/win/FontCacheWin.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/platform/image-decoders/avif/AVIFImageReader.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/ios/Device.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/mediastream/gstreamer/GStreamerAudioCaptureSource.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/mediastream/gstreamer/GStreamerCaptureDeviceManager.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/mediastream/gstreamer/GStreamerCapturer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/mediastream/gstreamer/GStreamerVideoCaptureSource.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/mediastream/gstreamer/GStreamerVideoCapturer.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/mediastream/libwebrtc/gstreamer/GStreamerVideoDecoderFactory.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/mediastream/libwebrtc/gstreamer/GStreamerVideoEncoderFactory.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/platform/network/ResourceHandleClient.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/platform/network/ResourceRequestBase.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/platform/network/ResourceRequestBase.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/platform/network/ResourceResponseBase.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/network/curl/CurlSSLHandle.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 32,
+  "path": "WebCore/platform/sql/SQLiteDatabase.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/platform/sql/SQLiteDatabase.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 16,
+  "path": "WebCore/platform/text/BidiContext.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/platform/text/LocaleICU.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/platform/text/TextCodec.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 11,
+  "path": "WebCore/platform/text/TextEncodingRegistry.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/platform/xr/openxr/OpenXRInstance.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/rendering/FloatingObjects.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 22,
+  "path": "WebCore/rendering/GridTrackSizingAlgorithm.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/rendering/GridTrackSizingAlgorithm.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 26,
+  "path": "WebCore/rendering/RenderBox.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebCore/rendering/RenderBoxModelObject.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WebCore/rendering/RenderDeprecatedFlexibleBox.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/rendering/RenderElement.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 327,
+  "path": "WebCore/rendering/RenderGrid.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 37,
+  "path": "WebCore/rendering/RenderGrid.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 18,
+  "path": "WebCore/rendering/RenderImage.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/rendering/RenderImageResource.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/rendering/RenderImageResource.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebCore/rendering/RenderInline.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/rendering/RenderLayer.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebCore/rendering/RenderLayerCompositor.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/rendering/RenderMenuList.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 16,
+  "path": "WebCore/rendering/RenderObject.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/rendering/RenderObject.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 15,
+  "path": "WebCore/rendering/RenderVideo.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebCore/rendering/RenderWidget.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 13,
+  "path": "WebCore/rendering/TextBoxPainter.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 18,
+  "path": "WebCore/rendering/line/LineWidth.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 43,
+  "path": "WebCore/rendering/style/FillLayer.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/rendering/style/FillLayer.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 8,
+  "path": "WebCore/rendering/style/KeyframeList.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 5,
+  "path": "WebCore/rendering/style/RenderStyle.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/rendering/style/StyleRareInheritedData.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/rendering/style/StyleRareInheritedData.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 13,
+  "path": "WebCore/rendering/svg/RenderSVGImage.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/rendering/svg/SVGRenderSupport.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 8,
+  "path": "WebCore/rendering/updating/RenderTreeBuilder.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebCore/storage/StorageQuotaManager.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/style/RuleSetBuilder.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/style/StyleAdjuster.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 6,
+  "path": "WebCore/style/StyleBuilder.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/style/Styleable.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGAElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGCircleElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGClipPathElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGComponentTransferFunctionElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGCursorElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGEllipseElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFEBlendElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFEColorMatrixElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFEComponentTransferElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFECompositeElement.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 45,
+  "path": "WebCore/svg/SVGFEConvolveMatrixElement.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 2,
+  "path": "WebCore/svg/SVGFEConvolveMatrixElement.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFEDiffuseLightingElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFEDisplacementMapElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFEDropShadowElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFEGaussianBlurElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFEImageElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFELightElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFEMergeNodeElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFEMorphologyElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFEOffsetElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFESpecularLightingElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFETileElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFETurbulenceElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFilterElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFilterPrimitiveStandardAttributes.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGFitToViewBox.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGForeignObjectElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGGeometryElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGGradientElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGGraphicsElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGImageElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGLineElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGLinearGradientElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGMarkerElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGMaskElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGPathElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGPatternElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGPolyElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGRadialGradientElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGRectElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGSVGElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGStopElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGTests.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGTextContentElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGTextPathElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGTextPositioningElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGURIReference.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGUseElement.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/svg/SVGViewSpec.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/svg/graphics/SVGImage.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 1,
+  "path": "WebCore/svg/graphics/SVGImageForContainer.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 9,
+  "path": "WebCore/svg/properties/SVGAnimationDiscreteFunction.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 13,
+  "path": "WebCore/svg/properties/SVGAnimationDiscreteFunctionImpl.h"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/testing/MockContentFilter.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/testing/js/WebCoreTestSupport.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/workers/service/server/RegistrationDatabase.cpp"
+ },
+ {
+  "status": "mechanical",
+  "changedLines": 4,
+  "path": "WebCore/xml/parser/XMLDocumentParserLibxml2.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 32,
+  "path": "WebDriver/CMakeLists.txt"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 106,
+  "path": "WebDriver/CommandResult.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 20,
+  "path": "WebDriver/CommandResult.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 114,
+  "path": "WebDriver/Session.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 4,
+  "path": "WebDriver/SessionHost.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 75,
+  "path": "WebDriver/WebDriverService.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebDriver/config.h"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 60,
+  "path": "WebDriver/socket/SessionHostSocket.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 3,
+  "path": "WebInspectorUI/UserInterface/Controllers/IndexedDBManager.js"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 18,
+  "path": "WebKitLegacy/Storage/InProcessIDBServer.cpp"
+ },
+ {
+  "status": "semantic",
+  "changedLines": 12,
+  "path": "WebKitLegacy/Storage/WebDatabaseProvider.h"
+ }
+]

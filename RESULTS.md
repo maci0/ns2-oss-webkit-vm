@@ -32,7 +32,8 @@ access. §9.4 explains why `-DENABLE_SECURITY_ASSERTIONS=0` alone does not do it
 | host gaps | glib2 2.90.1 ships neither `gdbus-codegen`, `glib-mkenums` nor `glib-genmarshal`; wrappers into the Flatpak GNOME SDK 50 live in `~/ns2-wk/bin`. A missing `glib-mkenums` fails **silently** (pipeline into `>` leaves a 0-byte `WebKitEnumTypes.h` / `WebKitWebProcessEnumTypes.h`) |
 | runtime paths | 2.40.5 without `ENABLE_DEVELOPER_MODE` compiles in `/usr/local/libexec/webkit2gtk-4.1` and `/usr/local/lib/webkit2gtk-4.1`, and compiles *out* `WEBKIT_EXEC_PATH` / `WEBKIT_INJECTED_BUNDLE_PATH`; `poc/build-harness.sh` stages an install and symlinks both |
 
-Build notes with the exact failure signatures: `~/ns2-wk/notes/build-notes.md`.
+Build notes with the exact failure signatures and the rebuild loop:
+[`poc/BUILD-NOTES.md`](poc/BUILD-NOTES.md).
 
 ### 9.2 A/B results
 
@@ -205,8 +206,10 @@ Three consequences:
   bounds-checked `srcX`/`srcY` and there is no channel back to the page — no
   crash, no leak, only a shifted sample. The modelling tree still reports it
   because ASAN sees the read; the console will not.
-- **`build/` remains useful only as a "did the trigger fire" probe**, since its
-  release assertion is a property of 2.40.5's `PixelBuffer` plumbing.
+- **`build/` remains useful only as a "did the trigger fire" probe.** Its
+  `ENABLE_SECURITY_ASSERTIONS=1` makes the *modelling* assert live, so it traps
+  where the console would corrupt; that is a property of our stand-in build
+  configuration, not of 19.0.0.
 
 The honest ranking for 19.0.0 is therefore: **#15** (real UAF, page-controlled
 lifetime) first, **#5** (real heap overflow write, attacker-valued bytes)

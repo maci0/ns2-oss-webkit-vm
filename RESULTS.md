@@ -198,7 +198,9 @@ Three consequences:
 - **#5 on 19.0.0 is silent corruption, not a crash.** Nothing stops it at the
   write site; what notices is whatever the corrupted memory belongs to. The
   modelling tree's `WRITE of size 1` is ASAN observing the access the console
-  performs.
+  performs. §9.7 shows the same page on the console-profile build: the invalid
+  offset aborts inside the allocator (`double free or corruption (out)`) while a
+  valid offset survives.
 - **#2/#3/#4 lose their "oracle" reading.** The one-byte read below the
   displacement buffer was only observable in the secure tree because
   `PixelBuffer::item` traps on `SIZE_MAX` there. On 19.0.0, and on the modelling
@@ -250,6 +252,242 @@ Two operational notes: ASAN's quarantine hides reuse, so pass
 `document.title = …` allocates 528-byte CSS `RuleAndSelector` vectors and wins
 the chunk first.
 
-Arbitrary-byte control was **not** achieved with page data. What is demonstrated
-is reuse by an object of the attacker's choosing from the page's own vocabulary,
-which is the prerequisite for a corruption primitive, not the primitive itself.
+At this point the reclaim was still "reuse by an object of the page's own
+vocabulary". §9.6 replaces the second canvas with page bytes.
+
+#### One heap, not several
+
+The reclaim is not fighting an allocator split. In the 19.0.0 drop
+(`webkit_3.6.8` + `WKC_3.6.8`):
+
+* there is no `bmalloc` at all — `WTF/wtf/FastMalloc.cpp` is the whole
+  allocator, and `WKC_3.6.8/WTF/wtf/WKC/FastMallocWKC.cpp` implements
+  `fastMalloc`/`fastFree` as `wkcHeapMallocPeer`/`wkcHeapFreePeer`, one peer
+  heap for the process;
+* `WTF/wtf/IsoMalloc.h` routes `WTF_MAKE_ISO_ALLOCATED` to
+  `WTF_MAKE_FAST_ALLOCATED` under `PLATFORM(WKC)`, so there are no iso-heaps;
+* `WTF/wtf/Gigacage.h` sets `GIGACAGE_ENABLED 0` under `PLATFORM(WKC)`.
+
+Every 584-byte object in this document — the context, the spray, the second
+canvas, `Vector<ScriptCallFrame>` — therefore comes out of the same arena, and
+"which allocation wins the freed chunk" is decided by the peer heap's own
+policy. That policy is not in the source drop, so reclaim reliability is
+measured (below), not predicted.
+
+### 9.6 Page-controlled reclaim: fake `State`, arbitrary read and write
+
+The reclaim above used a second canvas, whose bytes the page cannot choose.
+`uaf-spray.html` instead frees the context and then allocates `N` `Uint8Array`s
+of exactly 584 bytes. With `ASAN_EXTRA="quarantine_size_mb=0:
+thread_local_quarantine_size_kb=0"` one of them wins the chunk, and every byte
+of the stale `CanvasRenderingContext2D` is then page data.
+
+Two things had to change for this to be repeatable:
+
+* **no `console.log` between the free and the use.** Logging makes the inspector
+  build a `Vector<ScriptCallFrame>` for the console message, which is itself a
+  584-byte `fastMalloc`. A hardware watchpoint on the freed chunk shows that
+  allocation landing in it, ahead of the spray. Results therefore accumulate in
+  an array and are published through `document.title` (the harness prints it as
+  `TITLE: …`).
+* **`?delay=<ms>`**: the whole trigger/spray/use sequence can be deferred so a
+  debugger can attach first. It still runs inside a single task, which the
+  reclaim depends on. At `delay=6000` the write below succeeds 3/3.
+
+#### Offset oracle
+
+`?fill=offset` fills every qword with `0x4141414100004141 + (offset << 16) +
+(offset >> 3)`. A fault address of the form `0x41414141…<offset>` then names the
+field that was read, without a debugger and without ASAN symbolisation. `fill=vt`
+(zero everywhere, marker vptr) is the variant used to look for virtual dispatch
+on the stale object; ~33 different 2D calls were swept this way and none of them
+reached a vtable slot.
+
+#### Layout (clang record dump, `build-noassert`, x86-64, 2.40.5 + reverts)
+
+`CanvasRenderingContext2DBase` — `sizeof = 584`:
+
+| off | field |
+|---|---|
+| 0 | vptr (`CanvasRenderingContext`) |
+| 8 | `ScriptWrappable::m_wrapper` |
+| 16 | `m_hasActiveInspectorCanvasCallTracer` |
+| 24 | `CanvasBase& m_canvas` |
+| 32 | `CanvasPath` vptr, 40 `m_path` |
+| 72 | `m_stateStack.m_buffer` |
+| 80 / 84 | `m_stateStack.m_capacity` / `m_size` |
+| 88 | inline `State` buffer (1 element) |
+| 544 | `m_dirtyRect` |
+| 560 | `m_unrealizedSaveCount` |
+| 564 / 565 | `m_usesCSSCompatibilityParseMode` / `m_usesDisplayListDrawing` |
+| 568 | `m_recordingContext` |
+| 576 | `m_settings` |
+
+`State` — `sizeof = 456` (`imul $0x1c8` in `setLineWidth`):
+
+| off | field | off | field |
+|---|---|---|---|
+| 0 / 8 | `unparsedStrokeColor` / `unparsedFillColor` | 96 | `globalAlpha` |
+| 16 | `strokeStyle` | 112 | `transform` |
+| 48 | `lineWidth` | 160 | `hasInvertibleTransform` |
+| 56 / 57 | `lineCap` / `lineJoin` | 168 / 176 / 180 | `lineDash` buffer / cap / size |
+| 64 | `miterLimit` | 184 | `lineDashOffset` |
+| 72 | `shadowOffset` | 192 / 196 | `imageSmoothingEnabled` / `Quality` |
+| 80 / 88 | `shadowBlur` / `shadowColor` | 200 / 204 / 208 | `textAlign` / `textBaseline` / `direction` |
+| | | 216 / 224 | `unparsedFont` / `font` |
+
+`state()` and `modifiableState()` both return `m_buffer[m_size - 1]`, so
+`m_buffer` and `m_size` are the two knobs that decide *where* a setter writes:
+
+```
+&state = *(void **)(obj + 72) + (m_size - 1) * 456
+```
+
+`realizeSaves()` is a no-op while `m_unrealizedSaveCount` (560) is 0, so a fake
+stack of exactly one entry never grows. `?sbuf=<addr>` is the shorthand that
+sets `72 = addr`, `80 = 1`, `84 = 1`, `560 = 0`, and `?set=<off>:<val>[;…]`
+overrides individual qwords.
+
+One failure mode is worth recording: `m_size = 0` makes `Vector::last()` trip
+`RELEASE_ASSERT(m_size)`. Release builds treat `RELEASE_ASSERT` as an abort, so
+the run looks like a silent SIGABRT with no sanitizer output; adding
+`handle_sigill=1:handle_abort=1:handle_sigbus=1` to `ASAN_OPTIONS` turns it into
+`ABRT` at `CanvasRenderingContext2DBase::setLineWidth(double) [clone .cold]`.
+
+#### Arbitrary 8-byte read
+
+`lineWidth()` returns `state().lineWidth`, i.e. an 8-byte load from
+`m_buffer + (m_size - 1) * 456 + 48`. Point `m_buffer` anywhere readable and read
+the qword back as a double:
+
+```
+?size=584&n=64&fill=zero&sbuf=0x7fffe5dfffd0&op=lineWidthGet
+→ TITLE: … op lineWidthGet -> lw=0x00010102464c457f
+```
+
+`0x00010102464c457f` is `\x7fELF\x02\x01\x01` — the ELF header of
+`libwebkit2gtk-4.1.so.0`, whose base is `0x7fffe5e00000` under
+`setarch $(uname -m) -R`. No crash, no sanitizer output.
+
+#### Arbitrary 8-byte write
+
+Setters write the state field *before* calling `drawingContext()`, so any of them
+is a write primitive that needs no valid `m_canvas`:
+
+* `setTextAlign` (200), `setTextBaseline` (204), `setDirection` (208),
+  `setImageSmoothingQuality` (196) — small enums, no `drawingContext()` at all.
+* `setLineWidth` (48), `setGlobalAlpha` (96), `setMiterLimit` (64),
+  `setLineDashOffset` (184) — f64, written first, then `drawingContext()` is
+  called and returns null on a zeroed `m_canvas`, which is harmless.
+
+`op=textAlignRW` with `sbuf=0x7ffff757a8b8` writes `CenterTextAlign` into the
+last 8 bytes of `.bss` at `0x7ffff757a980` and reads it back as `center`.
+
+`op=lineWidthRW` with `sbuf=0x7ffff757a950&set=24:<live CanvasBase>` writes 3.25
+at `sbuf + 48` and reads back `0x400a000000000000`:
+
+```
+TITLE: stale=ctx sprayed 64 x 584 fill=zero |
+       op lineWidthRW -> wrote then read 0x400a000000000000 | end
+```
+
+— no crash, 3/3 runs at `delay=6000`. The value is a page-chosen double, and any
+positive finite double is accepted (`std::isfinite(width) && width > 0`), which
+covers every canonical user-space pointer bit pattern (they are positive
+subnormals). With `m_size` the offset is steerable in steps of 456 bytes, so the
+pair (`m_buffer`, `m_size`) addresses memory rather than just one fixed qword.
+
+If `m_canvas` (24) is *not* a live `CanvasBase`, the virtual dispatch in
+`drawingContext()` is `call *0x68(%rax)` with `%rax = m_canvas`, i.e. a SEGV at
+`0x68`. It is honoured from the spray like any other qword: `set=24:0x4141…`
+faults in `toJS(HTMLElement&)` through `jsCanvasRenderingContext2D_canvas`, which
+is a second, independent confirmation that field 24 is the base of the canvas
+element (`toJS` subtracts `0x68`).
+
+#### What is still missing: a leak
+
+Every primitive above needs one address the page does not have. The page can
+choose the *bytes* of the reclaimed chunk, but nothing inside that chunk tells
+it where the chunk is, and no getter on the stale object returns a field raw
+(`canvas` goes through `toJS`, which subtracts `0x68` from the value; the
+string getters go through `StringImpl`). Three routes were evaluated:
+
+* **Reclaim with a pointer-bearing allocation.** If the winner of the 584-byte
+  chunk is a WebKit object instead of a `Uint8Array`, offset 72 is one of that
+  object's fields. A *self-relative* pointer there — a `Vector`'s pointer to its
+  own inline buffer, i.e. `&object + delta` — turns `state()` into "read at a
+  known offset inside the object", which is enough to fetch a vtable or heap
+  pointer **if** one sits at `delta + 48` and the `m_size` word at offset 84 is
+  small and positive. That is a layout search over 584-byte allocations, not a
+  code change; the `m_size` constraint (offset 84 must be 1..N, not a pointer
+  half or a capacity) is the hard part.
+* **A non-randomised heap.** The target is a single-purpose applet whose heap is
+  laid out once at launch. If the WKC peer heap lands at a fixed address on
+  hardware — as the JSC heap does on several console targets — no leak is
+  needed. Not decidable from the host; needs the rig and the console-side
+  trigger of §7.
+* **Ruled out.** `Vector<ScriptCallFrame>` ("the thief"): element 1's
+  `m_column` lands on offset 72 and `m_lineNumber` on 84, so it does win the
+  chunk, but it yields a wild pointer, not a leak. `getLineDash()` over a fake
+  `Vector` copies from whatever address the fake state holds. `save()` /
+  `restore()` growth (`realizeSaves()`) reallocates the fake stack into a fresh
+  912-byte buffer and stays in bounds. A fake `ScriptWrappable` reaching `toJS`
+  is dereferenced, not revealed.
+
+So the chain stands at: UAF, page-controlled reclaim, arbitrary 8-byte read and
+write — demonstrated on both the ASAN tree and the console-profile tree — with
+one link missing, an in-page pointer.
+
+### 9.7 The same primitives on the console-profile build
+
+`build-console/` is the WKC feature-set profile (`poc/BUILD-NOTES.md`): Release,
+`ENABLE_SECURITY_ASSERTIONS=0`, no JIT, no WebGL/WebAssembly, layer-based SVG
+engine off, 178 cache settings copied from the 23.0.1 feature list. Nothing in
+this section has ASAN around it, so nothing pads, quarantines or redzones the
+objects involved.
+
+Addresses come from `console-maps.sh` under `setarch $(uname -m) -R`: the
+library maps at base `0x7ffff3e00000`, and its only file-backed `rw-p` segment
+is `0x7ffff7f0a000-0x7ffff7f2c000`.
+
+| run | result |
+|---|---|
+| `?size=584&n=64&fill=zero&sbuf=0x7ffff3dfffd0&op=lineWidthGet` | `lw=0x00010102464c457f` — the ELF header at the mapping's base, 0x30 above `sbuf` |
+| `…&sbuf=0x7ffff7f19f38&op=textAlignRW` | `wrote then read center` — `CenterTextAlign` stored at `sbuf + 200`, no live canvas needed |
+| `…&op=lineWidthLiveRW` (with `gdb-live-info.txt`) | `wrote then read 0x400a000000000000` — `setLineWidth` ran the full `drawingContext()` path |
+
+The third row is the one that matters: `m_canvas` (24) in the spray is zero, so
+the debugger supplies a real one. The page first sets `lineWidth` on a live
+context, and the breakpoint on `CanvasRenderingContext2DBase::setLineWidth`
+records that context's `m_canvas`; on the second hit, on the stale object, it
+writes that value into field 24 before the function body reads it:
+
+```
+LIVE obj=0x5555557a7ac0 m_canvas=0x5555557a7a30
+FAKE obj=0x555555805ba0 m_canvas_before=0 patching->0x5555557a7a30 q72=0x7ffff7f19f38 q84=1
+TITLE: … op lineWidthLiveRW -> wrote then read 0x400a000000000000
+```
+
+So the write is not limited to the four setters that skip `drawingContext()`: a
+fake context with an attacker-chosen `m_canvas` reaches
+`GraphicsContext::setStrokeThickness` on a live context and still lands its
+value in the fake `State`. The stale object is at `0x555555805ba0`, the live
+canvas element at `0x5555557a7a30`: both sit in the process's brk heap, the
+main arena that `fastMalloc` uses when bmalloc and the iso-heaps are not
+compiled in (§9.5).
+
+#5 on the same tree (`feconvolve-target.html`, the page of §9.4):
+
+| `?targetY=` | result |
+|---|---|
+| 2 (valid) | `still alive after the repaint`, page runs 8 s, `exit=0` |
+| 45 (default) | `double free or corruption (out)`, `HARNESS: web process terminated (crashed)` |
+| 60 | same |
+
+The valid offset is the control: it renders the same filter for the same 8 s.
+With an invalid one, the abort appears immediately after `targetY.baseVal = 45`
+is accepted and names the allocator, i.e. the 44 KB overrun of §9.4 has damaged a
+chunk header on the no-ASAN build. That is the "silent corruption" of §9.4
+becoming visible through glibc's own metadata check rather than through ASAN,
+and it closes the objection that the modelling tree's report was an artifact of
+the stand-in's instrumentation.

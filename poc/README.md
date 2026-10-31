@@ -1,13 +1,14 @@
 # v19 proof-of-concepts — a runnable 19.0.0-equivalent WebKit
 
-Three page-level PoCs for the memory-safety items in
-[`../../docs/V19-FIX-DELTA.md`](../../docs/V19-FIX-DELTA.md) that 23.0.1 fixes
+Page-level PoCs for the memory-safety items in
+[`../FIX-DELTA.md`](../FIX-DELTA.md) that 23.0.1 fixes
 and 19.0.0 does not: **#5** (heap overflow write in `FEConvolveMatrix`),
 **#15** (use-after-free in `HTMLCanvasElement::getContext`) and **#2/#3/#4**
 (the SMIL-validated-attribute bypass that feeds an out-of-range channel selector
 to `FEDisplacementMap`). Plus the build recipe for an engine that actually runs
-them, one calibration probe (`getcontext-probe.html`) and the mechanical
-negative result for **#6** (`transform-gate.html`).
+them, one calibration probe (`getcontext-probe.html`), the mechanical negative
+result for **#6** (`transform-gate.html`), and the #15 follow-up that turns the
+reclaim into an address-driven read/write (`uaf-spray.html`).
 
 The rig runs 23.0.1, where all of them are fixed, so none can be demonstrated on
 the console. The only way to run them is an engine that matches 19.0.0 at the
@@ -65,7 +66,7 @@ ninja -C ~/ns2-wk/build -j32 MiniBrowser
 ninja -C ~/ns2-wk/build-noassert -j32 MiniBrowser
 ```
 
-### Two trees, and why
+### Three trees, and why
 
 `apply-v19-reverts.py` includes a **modelling patch**, not just the #5 revert.
 19.0.0's applier writes through `JSC::Uint8ClampedArray::set/item`, guarded by
@@ -82,6 +83,7 @@ build flag decides whether that guard is live:
 |---|---|---|
 | `build/` | 1 (forced by ASAN) | whether the trigger fires at all — the patched assert is live, so a silent "web process terminated" right after the page's last log line |
 | `build-noassert/` | 0 (forced via `CMAKE_CXX_FLAGS`) | the console's configuration: the assert is compiled out, so ASAN sees the access and emits `heap-buffer-overflow` / `heap-use-after-free` with frames |
+| `build-console/` | 0 (Release, no ASAN at all) | the console's configuration without a sanitizer in the way: #5 aborts inside the allocator and the #15 read/write runs on a heap that is not padded or quarantined (see below) |
 
 Release + ASAN also means `ASSERT_ENABLED == 0`, so the plain `ASSERT`s in the
 filter appliers are compiled out even in the probe tree. `USE_SYSTEM_MALLOC=ON`
@@ -157,17 +159,27 @@ HARNESS_OUT=$HOME/ns2-wk/out/v19-uaf ./run.sh ./harness-v19-noassert uaf-canvas.
 ```
 
 `build-harness.sh <build-dir> <output>` stages that tree's install into
-`~/ns2-wk/stage` and links against it; the two trees share the stage directory,
+`~/ns2-wk/stage` and links against it; every tree shares the stage directory,
 so building a harness re-stages whichever tree you name and existing symlinks
 stay valid. Use `~/ns2-wk/build/` for the probe tree and
 `~/ns2-wk/build-noassert/` for the ASAN-report tree.
 
 `build-harness.sh` compiles with `-fsanitize=address` deliberately, so the ASAN
 runtime comes first in the link order even against a non-ASAN system WebKit.
-`run.sh` needs an **absolute** page path, sets
-`ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:disable_coredump=1`, and does not
-set `LD_LIBRARY_PATH` — export it as above. Its stdout summary truncates the
-sanitizer block at 40 lines; the full report is `$HARNESS_OUT/run.log`.
+`run.sh` needs an **absolute** page path, exports `LD_LIBRARY_PATH` itself
+(`WK_BUILD=`, default `~/ns2-wk/build-noassert` — the web process is exec'd by
+path, so it inherits that variable rather than the harness's `DT_RUNPATH`), and
+sets `ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:disable_coredump=1`. Its
+stdout summary truncates the sanitizer block at 40 lines; the full report is
+`$HARNESS_OUT/run.log`.
+
+`build-harness-console.sh <build-dir> <output>` is the same recipe without the
+sanitizer flags, for `build-console/` — the run then needs
+`setarch $(uname -m) -R` in front of the harness, which
+`HARNESS_BIN=<wrapper> ./thief-run.sh` also accepts for the debugger runs.
+Re-staging is destructive: the stage directory is shared, so
+`DESTDIR=$HOME/ns2-wk/stage ninja -C build-noassert install` is needed before
+going back to an ASAN run.
 
 Build the same harness against the *fixed* system WebKitGTK (2.54.2) for the
 negative control; the source compiles unchanged against both. `run-all.sh` runs
@@ -258,11 +270,138 @@ Two practical notes from running it:
   and wins the chunk first — the first, verbose version of this page measured
   exactly that.
 
-Arbitrary-byte control of the chunk was *not* achieved with page data: strings
-and typed-array backing stores both lost the race to WebCore-side allocations.
-What is demonstrated is reuse by an object of the attacker's choosing from the
-page's own vocabulary (a canvas context), which is the prerequisite for a
-corruption primitive, not the primitive itself.
+Arbitrary-byte control of the chunk was *not* achieved on this page. Strings and
+typed-array backing stores both lost the race to WebCore-side allocations. What
+it demonstrates is reuse by an object of the attacker's choosing from the page's
+own vocabulary (a canvas context), which is the prerequisite for a corruption
+primitive, not the primitive itself. `uaf-spray.html` below picks up there.
+
+### #15 continued — `uaf-spray.html`
+
+Same lifetime bug, but the chunk is reclaimed with **page bytes**: the page frees
+the context and then allocates `N` `Uint8Array`s of exactly 584 bytes. With the
+quarantine disabled one of them wins, and every byte of the stale
+`CanvasRenderingContext2D` is then attacker data. On top of that the page builds
+a **fake `State`**, which turns the stale object into an address-driven read and
+write primitive.
+
+| `?` | meaning |
+|---|---|
+| `size=584&n=64` | spray shape; 584 is the measured free size |
+| `fill=marker\|zero\|offset\|vt` | chunk contents (`offset` is the offset oracle, `vt` adds a marker vptr) |
+| `sbuf=<addr>` | shorthand for `set=72:<addr>;80:1;84:1;560:0` — a fake one-entry state stack |
+| `set=<off>:<val>[;…]` | per-qword overrides (hex or decimal), applied to every sprayed buffer |
+| `op=<name>` | which 2D entry point to call on the stale wrapper |
+| `delay=<ms>` | run the whole sequence later, still in one task, so a debugger can attach |
+
+Two rules that the page exists to enforce:
+
+* **Never log between the free and the use.** A console message makes the
+  inspector build a `Vector<ScriptCallFrame>`, itself a 584-byte `fastMalloc`,
+  which a hardware watchpoint shows landing in the freed chunk ahead of the
+  spray. Results go to `document.title`, which the harness prints.
+* **`quarantine_size_mb=0:thread_local_quarantine_size_kb=0`.** Without it ASAN
+  keeps the chunk out of circulation and the spray cannot win; the run then
+  reports `heap-use-after-free` instead of using page bytes.
+
+#### Where the fields are
+
+`state()` and `modifiableState()` both return `m_buffer[m_size - 1]`, so two
+qwords decide where every setter writes:
+
+```
+&state = *(void **)(obj + 72) + (m_size - 1) * 456      (sizeof(State) == 456)
+```
+
+| off | field | off | field |
+|---|---|---|---|
+| 0 | vptr | 72 | `m_stateStack.m_buffer` |
+| 16 | `m_hasActiveInspectorCanvasCallTracer` | 80 / 84 | `m_stateStack.m_capacity` / `m_size` |
+| 24 | `CanvasBase& m_canvas` | 560 | `m_unrealizedSaveCount` |
+| 40 | `CanvasPath::m_path` | 565 | `m_usesDisplayListDrawing` |
+
+`m_size = 0` trips `RELEASE_ASSERT(m_size)` inside `Vector::last()`, which in a
+release build is a bare `abort()` — no sanitizer output. Add
+`handle_sigill=1:handle_abort=1:handle_sigbus=1` to `ASAN_OPTIONS` and it becomes
+`ABRT` at `CanvasRenderingContext2DBase::setLineWidth(double) [clone .cold]`.
+
+#### Read
+
+`lineWidth` lives at `State + 48`, so `op=lineWidthGet` is an 8-byte load from a
+page-chosen address:
+
+```
+?size=584&n=64&fill=zero&sbuf=0x7fffe5dfffd0&op=lineWidthGet
+→ op lineWidthGet -> lw=0x00010102464c457f          # \x7fELF\x02\x01\x01
+```
+
+That is the ELF header of `libwebkit2gtk-4.1.so.0`, whose base is
+`0x7fffe5e00000` under `setarch $(uname -m) -R`. No crash, no report. The same
+page on the console-profile tree (`build-console`, no ASAN) reads the same
+header at `0x7ffff3e00000` from `sbuf=0x7ffff3dfffd0`.
+
+#### Write
+
+Setters store into the state *before* they call `drawingContext()`, so each is a
+write primitive that is happy with a zeroed `m_canvas`:
+
+* no `drawingContext()` at all: `setTextAlign` (200), `setTextBaseline` (204),
+  `setDirection` (208), `setImageSmoothingQuality` (196)
+* f64 then `drawingContext()`: `setLineWidth` (48), `setGlobalAlpha` (96),
+  `setMiterLimit` (64), `setLineDashOffset` (184)
+
+```
+?…&sbuf=0x7ffff757a950&set=24:<live CanvasBase>&op=lineWidthRW
+→ op lineWidthRW -> wrote then read 0x400a000000000000
+```
+
+3.25 written at `sbuf + 48`, in the last bytes of `.bss`, read back as
+`0x400a000000000000`, no crash, 3/3 at `delay=6000`. `std::isfinite(width) &&
+width > 0` accepts every canonical user-space pointer bit pattern (they are
+positive subnormals), and `m_size` steers the target in 456-byte steps.
+
+`m_canvas` (24) must be a live `CanvasBase`, otherwise `drawingContext()` is
+`call *0x68(%rax)` with `%rax` the qword — a SEGV at `0x68`. It is taken from the
+spray like any other field: `set=24:0x41414141…` faults inside
+`toJS(HTMLElement&)` reached from `jsCanvasRenderingContext2D_canvas`.
+
+With no sanitizer in the way (`build-console`), and addresses from
+`console-maps.sh` under `setarch -R`:
+
+| run | result |
+|---|---|
+| `sbuf=0x7ffff7f19f38&op=textAlignRW` | `wrote then read center` — `CenterTextAlign` stored at `sbuf + 200` |
+| `…&op=lineWidthLiveRW` | `wrote then read 0x400a000000000000` — full `drawingContext()` path |
+
+The second row uses `op=lineWidthLiveRW`: the page first sets `lineWidth` on a
+live context, then on the stale one. `gdb-live-info.txt` breaks on
+`CanvasRenderingContext2DBase::setLineWidth(double)` and copies field 24 from the
+live receiver into the stale object on the second hit, so `setLineWidth` reaches
+`GraphicsContext::setStrokeThickness` with a real canvas while still storing
+into the fake `State`:
+
+```
+LIVE obj=0x5555557a7ac0 m_canvas=0x5555557a7a30
+FAKE obj=0x555555805ba0 m_canvas_before=0 patching->0x5555557a7a30 q72=0x7ffff7f19f38 q84=1
+```
+
+What is missing for a full exploit is an **in-page leak**. Both demos take their
+addresses from the query string, which here came from gdb or from an ASLR-off
+run. Three routes are left, and two of them are already closed:
+
+* **A reclaiming object with a self-relative pointer at offset 72.** A `Vector`
+  pointing at its own inline buffer makes `state()` an address inside the object
+  the page already knows the layout of, so one qword at a fixed offset could be
+  a vtable or heap pointer. The blocker is offset 84: `m_size` has to be a small
+  positive integer there, not a capacity or the high half of a pointer.
+* **A heap that is not randomised on the target.** Single-purpose applet, heap
+  laid out once at launch; only the rig can answer this.
+* Closed: a fake `ScriptWrappable` handed back through `toJS(HTMLElement&)` is
+  dereferenced, not revealed; the string getters go through `StringImpl`; the
+  `Vector<ScriptCallFrame>` reclaim puts `m_column` at 72 and `m_lineNumber` at
+  84, which is a wild pointer rather than a leak; `getLineDash()` over a fake
+  `Vector` copies from the same unknown address; `save()`/`restore()` growth
+  reallocates the fake stack and stays in bounds.
 
 ## #5 — `feconvolve-target.html`
 
@@ -321,6 +460,14 @@ is page-chosen — with `?bias=144` it printed `index=262144 size=262144
 value=144` (0x90) and `maxAlpha=144`. Control 2.54.2 stays alive because the
 fixed engine drops the filter on `svgAttributeChanged`. Details in
 [`../RESULTS.md`](../RESULTS.md) §9.2.
+
+On the console-profile tree the same page turns the corruption into a visible
+death: `?targetY=2` (valid) survives the 8 s the page runs, while `45` and `60`
+both abort inside the allocator with `double free or corruption (out)` right
+after `targetY.baseVal` is accepted, and the web process is reported as crashed.
+That is glibc's own chunk-header check, not ASAN, so it is the console's own
+failure mode: the writes are silent until something touches the corrupted
+metadata.
 
 ## #2/#3/#4 — `fedisplacement-selector.html`
 
@@ -386,6 +533,8 @@ not an entrypoint.
 |---|---|---|---|
 | `uaf-canvas.html` | `same=true`, no report | `same=false`, `heap-use-after-free` READ | real UAF |
 | `uaf-canvas-reclaim.html?mode=canvas` | `same=true`, second canvas stays black | stale wrapper **is** the second context (red pixel readback) | UAF → page-controlled type confusion |
+| `uaf-spray.html?op=lineWidthGet` | n/a (needs a stale wrapper) | ELF header of `libwebkit2gtk` read from `sbuf` | **arbitrary 8-byte read** |
+| `uaf-spray.html?op=lineWidthRW` | n/a | `0x400a000000000000` written at `sbuf+48` and read back, no crash | **arbitrary 8-byte write** |
 | `feconvolve-target.html` | filter dropped, no report | `heap-buffer-overflow` WRITE of `0x90` at byte 262144, 44,024 bytes deep | real overflow write |
 | `fedisplacement-selector.html` | no report (release lib) | `heap-buffer-overflow` READ in `PixelBuffer::item` | silent one-byte read |
 | `transform-gate.html` | — | clean | not reachable (§9.3) |

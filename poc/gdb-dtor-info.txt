@@ -1,0 +1,10 @@
+set pagination off
+set confirm off
+break WebCore::CanvasRenderingContext2D::~CanvasRenderingContext2D()
+commands
+silent
+printf "DTOR obj=%#lx vptr=%#lx m_canvas=%#lx statebuf=%#lx cap=%u size=%u rec=%#lx\n", $rdi, *(unsigned long*)$rdi, *(unsigned long*)($rdi+24), *(unsigned long*)($rdi+72), *(unsigned int*)($rdi+80), *(unsigned int*)($rdi+84), *(unsigned long*)($rdi+568)
+continue
+end
+printf "ARMED\n"
+continue

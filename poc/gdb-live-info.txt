@@ -1,0 +1,17 @@
+set pagination off
+set confirm off
+set $live = 0
+break WebCore::CanvasRenderingContext2DBase::setLineWidth(double)
+commands
+silent
+if $live == 0
+  set $live = *(unsigned long*)($rdi+24)
+  printf "LIVE obj=%#lx m_canvas=%#lx\n", $rdi, $live
+else
+  printf "FAKE obj=%#lx m_canvas_before=%#lx patching->%#lx q72=%#lx q84=%u\n", $rdi, *(unsigned long*)($rdi+24), $live, *(unsigned long*)($rdi+72), *(unsigned int*)($rdi+84)
+  set *(unsigned long*)($rdi+24) = $live
+end
+continue
+end
+printf "ARMED\n"
+continue

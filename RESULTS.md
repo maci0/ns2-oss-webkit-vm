@@ -6,6 +6,15 @@ Mirror of [`docs/V19-BRANCH.md`](https://github.com/maci0/ns2/blob/main/docs/V19
 
 ## 9. Running the 19.0.0-equivalent engine
 
+> **Correction, 31 October 2026.** §9.8–§9.10 were run on the rig console and
+> filed as measurements of the **19.0.0** engine. They are not: the console runs
+> **23.0.1**, read off Settings → System
+> ([poc/media/system-version-23.0.1.jpg](poc/media/system-version-23.0.1.jpg)).
+> The three verdicts are sound; only the firmware they were attributed to was
+> wrong. §9.11 is the correction, and it retracts the "shipped binary backports
+> the fixes" reading that this section originally drew from them. Nothing below
+> has been tested on a 19.0.0 machine.
+
 ### 9.1 Build
 
 The only way to execute the audited sites before an actual 19.0.0 console is to
@@ -215,12 +224,12 @@ Three consequences:
 
 The ranking at this point was **#15** first, **#5** second, **#2/#3/#4** a silent
 one-byte read with no output channel, **#6** unreachable. Both top candidates
-are now closed on the shipped binary: §9.9 shows the console's `getContext`
+are now closed on the console's 23.0.1 engine: §9.9 shows its `getContext`
 re-checking `m_context` after the dictionary conversion, so the re-entrant call
 can no longer install the context the outer call drops, and §9.10 shows the
 console revalidating a dynamically invalid `targetY` before the effect sees it.
-#5 remains the correct description of the 613.3.9 source and of the modelling
-builds; it is just not reachable on the target.
+#5 remains the correct description of the 19.0.0/613.3.9 source and of the
+modelling builds; it is just not reachable on a 23.0.1 console.
 
 ### 9.5 Reclaiming #15's freed object
 
@@ -496,7 +505,7 @@ becoming visible through glibc's own metadata check rather than through ASAN,
 and it closes the objection that the modelling tree's report was an artifact of
 the stand-in's instrumentation.
 
-### 9.8 The 23.0.1 GetterSetter addrof does not transfer (console verdict)
+### 9.8 The GetterSetter addrof does not transfer on 23.0.1 (console verdict)
 
 The 2024 fix behind the GetterSetter addrof
 ([`LEAK-HUNT.md` §2](https://github.com/maci0/ns2/blob/main/oss/LEAK-HUNT.md))
@@ -555,7 +564,7 @@ tuning in `addrofProtoFamily` will change that. The remaining route is the one
 whose own fields are pointers — or a non-randomised peer heap, which only the
 rig can decide.
 
-### 9.9 #15 is guarded in the shipped engine (console verdict)
+### 9.9 #15 is guarded on 23.0.1 (console verdict)
 
 §9.6 ends with the page holding a wrapper for a freed 584-byte context and
 choosing its bytes. On the console that chain does not start: the re-entrant
@@ -597,7 +606,8 @@ Each row has a single reading, and together they close the route:
   getter does not fire (`fired:0`). So the engine does see the returned
   options dictionary — and then re-checks `m_context` after converting it.
 
-That last point is where the shipped binary and the published source part ways.
+That last point is where the console's 23.0.1 engine and the published 19.0.0
+source part ways.
 The 19.0.0 drop (`webkit_3.6.8/WebCore/html/HTMLCanvasElement.cpp:297–307`)
 converts the dictionary and calls `createContext2d()` unconditionally; that
 function contains only `ASSERT(!m_context)` and then
@@ -612,31 +622,33 @@ reentrant getContext()", bug 313175) that the 23.0.1 delta attributes to
 
 Two practical consequences:
 
-1. **#15 is not an entrypoint on this target.** The wrapper-free primitive of
+1. **#15 is not an entrypoint on 23.0.1.** The wrapper-free primitive of
    §9.6 ("arbitrary 8-byte read and write given an address") needs a freed
    context; there is none. The 584-byte reclaim, the fake `State` and the
    `lineWidthLiveRW` path remain correct descriptions of the *class*, and they
-   are what the host tree exercises — but they cannot be reached here.
-2. **The published drop is not sufficient to model this engine.** For this
-   function it is missing a security fix the console has. Treat every
-   "the drop says X" conclusion in this branch as a hypothesis until a console
-   run supports it; the fix delta of [`FIX-DELTA.md`](FIX-DELTA.md) measures the
-   *source* difference between 19.0.0 and 23.0.1, not necessarily the shipped
-   difference.
+   are what the host tree exercises — but they cannot be reached here. Whether a
+   19.0.0 build has the same guard is a separate question, and the source says
+   it does not (§9.11).
+2. **The drop and the console differ because they are different firmwares.**
+   `webkit_3.6.8` is 19.0.0; this console runs 23.0.1, whose drop
+   (`webkit_3.12.11`) contains the same `040ef6e21ffa` re-check. No backport of
+   a fix into a shipped 19.0.0 binary is needed to explain anything observed
+   here.
 
 The remaining entrypoint with the page controlling the access and the bytes is
 **#5** (§9.4, §9.7): `feConvolveMatrix` with an invalid `targetY` writes 44,024
-bytes of `clamp(bias*255)` past a 262,144-byte `PixelBuffer`, and the console's
-build has no assertion at that write site. Nothing in this section touches it.
+bytes of `clamp(bias*255)` past a 262,144-byte `PixelBuffer`, and the 19.0.0
+source has no assertion at that write site. Nothing in this section touches it,
+and §9.10 measures a 23.0.1 console, where the site is revalidated instead.
 
-### 9.10 #5 is revalidated in the shipped engine (console verdict)
+### 9.10 #5 is rejected on 23.0.1 (console verdict)
 
 §9.4 and §9.7 leave `feConvolveMatrix` as the only entrypoint where the page
 controls both the access and the written bytes: the 19.0.0 drop validates
 `targetX`/`targetY` when the effect is built and never again, so an out-of-range
 value set *after* the first paint reaches the software applier, which writes
-44,024 bytes past the destination pixel buffer. On the console it does not. The
-runs below are `webkit-Sf9fwm`, 2026-10-31 11:15–11:25Z, page
+44,024 bytes past the destination pixel buffer. On this console — which runs
+23.0.1 — it does not. The runs below are `webkit-Sf9fwm`, 2026-10-31 11:15–11:25Z, page
 `www/experiments/feconv.js` (867) and `feconv-look.js` (868–871).
 
 | # | label | probe | result |
@@ -675,13 +687,14 @@ the 19.0.0 source does: `SVGFEConvolveMatrixElement::svgAttributeChanged`
 straight to `primitiveAttributeChanged()`, which mutates the existing effect
 through `setFilterEffectAttribute()` with no range check. The console validates
 first, the same way it re-checks `m_context` in §9.9. The 23.0.1 delta
-attributes this check (`3cfb6575ec08`) to a `#if PLATFORM(WKC)` block, which is
-consistent with a vendor backport that the published 19.0.0 source predates.
+attributes this check (`3cfb6575ec08`) to a `#if PLATFORM(WKC)` block, and that
+block is present in the 23.0.1 drop this console runs. Nothing has to be
+backported into a shipped 19.0.0 binary to explain what the console does.
 
 #### What this changes
 
 Three of the delta's fixes can be tested directly from the page, and all three
-are present in the shipped binary although absent from the published source:
+are present on the console although absent from the 19.0.0 drop:
 
 | fix | site | console verdict |
 |---|---|---|
@@ -690,17 +703,56 @@ are present in the shipped binary although absent from the published source:
 | GetterSetter `prototype` hardening | `JSObject::defineOwnProperty` refuses the data→accessor conversion | `TypeError` (§9.8) |
 
 `Version.xcconfig` in the drop says 613.3.9 and the applet reports
-`AppleWebKit/613.0`, so the branch is right — the binary is 613.3.9 **plus
-security fixes backported from later releases**.
-[`FIX-DELTA.md`](FIX-DELTA.md) measures the source distance between the 19.0.0
-snapshot and 23.0.1; it is not a list of bugs the console still has. Every
-remaining candidate from that delta is now a hypothesis to be *disconfirmed*,
-and the score so far is 0 of 3.
+`AppleWebKit/613.0`. That identifies the engine *branch*, and no more than that:
+both firmware drops are 613.3.9. [`FIX-DELTA.md`](FIX-DELTA.md) measures the
+source distance between the 19.0.0 snapshot and 23.0.1, so it is not a list of
+bugs this console still has. Every remaining candidate from that delta is a
+hypothesis for a *19.0.0* machine, and the console score is 0 of 3 because the
+fixes are present by construction. §9.11 says why that took two days to notice.
 
-The search therefore has to move to code Nintendo owns: `WKC_3.6.8`, the
-`*/WKC/` directories, the platform layer and the bindings that only exist in
-this fork. Upstream fixes are precisely what a vendor backports; fork-specific
-code is precisely what no upstream fix will ever cover. Candidates from 613.3.9
-that 23.0.1's delta does not cover are the second pool. What is *not* worth more
-console time is the rest of the 29-fix list, one fix at a time, until something
-in that list is shown to be reachable.
+### 9.11 Firmware identity, and the correction it forces
+
+§9.8–§9.10 were run on the rig console and, at the time, filed as measurements
+of the 19.0.0 engine. They are not. The console runs **23.0.1**, read off
+Settings → System ([poc/media/system-version-23.0.1.jpg](poc/media/system-version-23.0.1.jpg)),
+which is also the only firmware the rig's target table describes and the only
+drop whose filesystem geometry the host serves. The three verdicts themselves
+are sound and reproducible; only the firmware they were attributed to was wrong.
+
+| claim as written before this section | corrected |
+|---|---|
+| "the shipped 19.0.0 binary carries the `getContext` re-check" | the *23.0.1* engine does, and so does the 23.0.1 source |
+| "the console validates `targetY` first" | the 23.0.1 engine does; the 19.0.0 source does not |
+| "the GetterSetter `prototype` install throws on the console" | it throws on 23.0.1; 19.0.0 is untested |
+| "the binary is 613.3.9 plus backported security fixes" | it is 613.3.9 as *23.0.1* builds it, which the 23.0.1 drop already describes |
+| "0 of 3 delta fixes are live" | 0 of 3 are live **on 23.0.1**; 0 of 3 have been tested on 19.0.0 |
+
+Why the error survived: `report.jsonl` stamps every connect row
+`"target":"2-23.0.1"`, which looks like a measurement and is not one — the
+target table's qualifier is `['Nintendo Switch', 'AppleWebKit/613.0']`, which
+both drops satisfy, and `switch2-23.0.1` is the only key in the table, so the
+stamp is what a single-entry lookup returns for any Switch 2 applet. The one
+piece of real evidence, `NF/7.0.3.12.11` in the applet User-Agent carrying the
+23.0.1 fork revision, was recorded but treated as applet-side noise. The
+Settings screen removes all doubt; the target table still cannot.
+
+Practical consequences:
+
+* **Do not spend console time on the 29-fix list.** Every entry in
+  [`FIX-DELTA.md`](FIX-DELTA.md) is a *19.0.0* hypothesis, and there is no
+  19.0.0 console in the rig. Probing them here measures fixes that are present
+  by construction.
+* **The 19.0.0 branch stays a source audit** until a 19.0.0 unit joins the rig
+  (§7 step 1 of the research tree). Its value is unchanged: it is the only route
+  to bugs 23.0.1 has already closed.
+* **This console's own target is the fork code 23.0.1 still ships**, plus
+  613.3.9-era bugs the delta does not touch. Upstream fixes are precisely what a
+  vendor backports; fork-specific code is precisely what no upstream fix will
+  ever cover. That second pool is where the remaining search lives.
+* **`src/targets.ts` should gain a firmware qualifier** once a 19.0.0 applet UA
+  is known, so that a future mismatch fails the `find()` instead of silently
+  returning the 23.0.1 geometry. Until then the comment on the entry says what
+  the qualifier does *not* check.
+
+What is *not* worth more console time is the rest of the 29-fix list, one fix at
+a time, until something in that list is shown to be reachable on a 19.0.0 unit.

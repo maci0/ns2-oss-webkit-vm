@@ -335,19 +335,25 @@
 <h1
 id="webkit-fork-delta-fixes-shipped-in-switch-2-2301-but-not-in-1900">WebKit
 fork delta: fixes shipped in Switch 2 23.0.1 but not in 19.0.0</h1>
-<p>A source-level audit of the <code>NetFrontBrowserNX</code>
-open-source drops for two Switch 2 firmwares. It answers one question:
+<p>A source-level audit of the <code>NetFrontBrowserNX</code> drops for
+the two Switch 2 firmwares on this rig. It answers one question:
 <strong>what did Nintendo fix between system 19.0.0 and 23.0.1 that a
 web page can still reach on 19.0.0?</strong></p>
-<p>The two vendor JavaScriptCore trees are the same ones this repository
-already builds: <code>webkit_3.6.8</code> (19.0.0) and
-<code>webkit_3.12.11</code> (23.0.1), both grafted onto upstream WebKit
-613.3.9. Companion documents: <a
-href="NINTENDO-BUILD.md"><code>NINTENDO-BUILD.md</code></a> (the vendor
-graft and build), <a href="VM-SETUP.md"><code>VM-SETUP.md</code></a>
-(the upstream 613.3.9 JSC VM), and <a
-href="delta"><code>delta/</code></a> (the two analysis tools plus their
-recorded output).</p>
+<p>Compiled 30 October 2026. Companion documents: <a
+href="V19-BRANCH.md"><code>V19-BRANCH.md</code></a> (the branch report),
+<a
+href="../oss/ns2-19/BRANCH.md"><code>../oss/ns2-19/BRANCH.md</code></a>
+(provenance and tooling).</p>
+<blockquote>
+<p><strong>Status, 31 October 2026.</strong> The rig's console runs
+system <strong>23.0.1</strong> (<code>V19-BRANCH.md</code> §1.1, read
+off Settings → System). No entry in this list has been tested on a
+19.0.0 machine, and none of them is a bug that console still has: the
+three entries a page can reach were measured <em>present</em> on 23.0.1,
+which is the expected result, since 23.0.1 is where they were fixed.
+Read every row as a hypothesis for a 19.0.0 box, to be confirmed on one,
+not as a target list for this rig.</p>
+</blockquote>
 <h2 id="1-summary">1. Summary</h2>
 <p>Both drops are built on <strong>upstream WebKit 613.3.9</strong>
 (<code>WebKit-7613.3.9</code>, <code>WKC_WEBKIT_VERSION "613.0"</code>).
@@ -389,18 +395,15 @@ then indexes past the end of a pixel buffer. The rest are
 origin/CSP/sandbox checks, lifetime and crash fixes, and hardening.</p>
 <h2 id="2-method">2. Method</h2>
 <p>Reproducible from the two extracted source trees; no console, no
-build. The tools and their output are in <a
-href="delta"><code>delta/</code></a>.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> delta</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. classify every differing file, WKC churn normalised out</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> compare-forks.py <span class="dt">\</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  NS2_19.0.0/webkit_3.6.8 <span class="dt">\</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  NS2_23.0.0/webkit_3.12.11 <span class="dt">\</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--json</span> fork-delta.json</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. pull fix-shaped added lines out of the 321 semantic files</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> fix-candidates.py <span class="at">--json</span></span></code></pre></div>
+build.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. classify every differing file, WKC churn normalised out</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">oss/ns2-19/compare-forks.py</span> <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  oss/ns2-19/NS2_19.0.0/webkit_3.6.8 <span class="dt">\</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  oss/ns2-23/NS2_23.0.0/webkit_3.12.11 <span class="dt">\</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--json</span> oss/ns2-19/fork-delta.json</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. pull fix-shaped added lines out of the 321 semantic files</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> oss/ns2-19 <span class="kw">&amp;&amp;</span> <span class="ex">python3</span> fix-candidates.py</span></code></pre></div>
 <p>Step 1 normalises <code>WKCStd::</code>→<code>std::</code>,
 <code>WKCWTF::</code>→<code>WTF::</code>, fork revision numbers in prose
 and copyright-year ranges, then compares. Step 2 keeps only
@@ -410,13 +413,6 @@ guards, <code>rdar://</code>/bug-id comments and exception throws: 40
 files, 123 lines. Every one of those hunks was then read in full, and a
 second sweep over the remaining 281 semantic files looked for runtime
 guards (<code>if (… &gt;= …)</code>) inside changed code.</p>
-<p>To re-run it, extract both drops so the trees sit at
-<code>delta/NS2_19.0.0/</code> and <code>delta/NS2_23.0.0/</code> (the
-defaults above), or pass other paths. The committed
-<code>delta/fork-delta.json</code> and
-<code>delta/fix-candidates.json</code> are the output of the two
-commands, so the result can be read without downloading 340 MB of
-source.</p>
 <h2 id="3-the-list">3. The list</h2>
 <p>Ordered by relevance to an attacker holding a web page.</p>
 <h3 id="31-memory-safety-reachable-from-a-plain-page">3.1 Memory safety,
@@ -441,16 +437,21 @@ overflow</td>
 <td>2</td>
 <td><code>WebCore/platform/graphics/filters/software/FEDisplacementMapSoftwareApplier.cpp</code></td>
 <td><code>xChannelSelector</code>/<code>yChannelSelector</code>
-bounds-checked against <code>CHANNEL_R..CHANNEL_A</code> before indexing
-the displacement pixel buffer — out-of-bounds read</td>
+range-checked against <code>CHANNEL_R..CHANNEL_A</code> in
+<code>apply()</code>; without it an unparsable selector leaves
+<code>CHANNEL_UNKNOWN</code> (0), <code>xChannelIndex()</code> returns
+−1 and <code>item((size_t)-1)</code> reads <strong>one byte
+before</strong> the displacement buffer. The byte only feeds the same
+loop's bounds-checked <code>srcX</code>/<code>srcY</code>, so the defect
+is a single-byte underread with no write — see §4</td>
 </tr>
 <tr>
 <td>3</td>
 <td><code>WebCore/svg/properties/SVGAnimationDiscreteFunctionImpl.h</code></td>
-<td><code>setFromAndToValues()</code> ignores values
-<code>SVGPropertyTraits&lt;EnumType&gt;::fromString()</code> failed to
-parse, so <code>&lt;set to="foo"&gt;</code> can no longer install an
-unknown enum — validation bypass that enables 2 and 4</td>
+<td><code>setFromAndToValues()</code> keeps the previous value when
+<code>SVGPropertyTraits&lt;EnumType&gt;::fromString()</code> fails, so a
+SMIL <code>&lt;set to="foo"&gt;</code> can no longer install an unknown
+enum — the validation bypass that enables 2 and 4</td>
 </tr>
 <tr>
 <td>4</td>
@@ -464,8 +465,10 @@ rejected value leaves 0 instead of an indeterminate enum</td>
 <td>new
 <code>isValidTargetXOffset()</code>/<code>isValidTargetYOffset()</code>,
 applied on attribute change <em>and</em> at filter build; the old check
-only ran when <code>targetX</code>/<code>targetY</code> was written
-explicitly — out-of-bounds read</td>
+only ran at build, so an effect built with a valid offset could be
+mutated to an out-of-range one through SMIL — out-of-bounds write
+(44,024 bytes in the modelling build, <code>V19-BRANCH.md</code>
+§9.4)</td>
 </tr>
 <tr>
 <td>6</td>
@@ -566,16 +569,14 @@ context yet" asserts became
 <tr>
 <td>16</td>
 <td><code>WebCore/rendering/RenderDeprecatedFlexibleBox.cpp</code></td>
-<td>line-clamp teardown also fires when the <em>new</em> style sets one
-(the WKC branch fixes an <code>&amp;&amp;</code>/<code>||</code>
-precedence bug), so a stale clamp renderer is not reused</td>
+<td>line-clamp condition — <strong>withdrawn, see §3.5</strong></td>
 </tr>
 <tr>
 <td>17</td>
 <td><code>WebCore/platform/audio/HRTFDatabaseLoader.cpp</code></td>
 <td>the loader map holds <code>ThreadSafeWeakPtr</code>, and the
 destructor only unregisters when the mapped loader is itself —
-use-after-free race</td>
+user-after-free race</td>
 </tr>
 <tr>
 <td>18</td>
@@ -676,21 +677,102 @@ new form</td>
 </tr>
 </tbody>
 </table>
-<h2 id="4-what-it-means-for-a-1900-device">4. What it means for a 19.0.0
-device</h2>
+<h3 id="35-rows-withdrawn-or-closed-by-inspection">3.5 Rows withdrawn or
+closed by inspection</h3>
+<p>Numbering is kept so earlier references stay valid.</p>
+<p><strong>#16 is withdrawn.</strong> It was filed as "line-clamp
+teardown also fires when the new style sets one". The two files do
+differ, but not in a way that adds a check. 19.0.0 applies upstream's
+condition to every platform:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode c++"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>oldStyle <span class="op">&amp;&amp;</span> <span class="op">!</span>oldStyle<span class="op">-&gt;</span>lineClamp<span class="op">().</span>isNone<span class="op">()</span> <span class="op">&amp;&amp;</span> newStyle<span class="op">.</span>lineClamp<span class="op">().</span>isNone<span class="op">())</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    clearLineClamp<span class="op">();</span></span></code></pre></div>
+<p>23.0.1 keeps that line behind <code>#if !PLATFORM(WKC)</code> and
+gives WKC its own variant:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode c++"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span>oldStyle <span class="op">&amp;&amp;</span> <span class="op">!</span>oldStyle<span class="op">-&gt;</span>lineClamp<span class="op">().</span>isNone<span class="op">()</span> <span class="op">||</span> <span class="op">!</span>newStyle<span class="op">.</span>lineClamp<span class="op">().</span>isNone<span class="op">())</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    clearLineClamp<span class="op">();</span></span></code></pre></div>
+<p>So on a WKC build the clamp layout is now thrown away on <em>any</em>
+style change that carries a clamp, not only when one is removed. That is
+a rendering correctness workaround — it forces the clamp information to
+be rebuilt — and it contains no bounds, lifetime or ownership check. An
+earlier draft of this section claimed the WKC condition was
+byte-identical in both drops; the files say otherwise, and only the
+non-WKC branch is identical. The row still does not belong in a security
+delta, but for the weaker reason: nothing in the change can prevent an
+out-of-bounds access.</p>
+<p><strong>Not in the list, closed by inspection since
+publication.</strong> Both were read on the 23.0.1 tree, so the verdict
+applies to the engine the rig runs:</p>
+<table>
+<thead>
+<tr>
+<th>site</th>
+<th>finding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WebCore/svg/SVGToOTFFontConversion.cpp</code></td>
+<td><code>diff</code> between the drops is empty. Every write goes
+through
+<code>Vector::append</code>/<code>grow</code>/<code>overwrite16</code>/<code>overwrite32</code>;
+the only defect class is 16-bit truncation producing a
+<em>malformed</em> OTF whose declared fields are smaller than the real
+data, so a peer parser reading with those fields stays in bounds. The
+parser itself is in the closed part of the app.</td>
+</tr>
+<tr>
+<td><code>WKC/…/FontWKC.cpp</code>,
+<code>WKC/…/ComplexTextControllerWKC.cpp</code></td>
+<td>whole files behind <code>#if defined(WKC_PROP_USE_LIBFONT)</code> in
+23.0.1 (50 occurrences of the flag, 0 in 19.0.0, where the files are
+unconditional). If the flag is undefined on the console, the
+emoji-cluster <code>uncheckedAppend</code> lead and the
+<code>fixedU16Text</code> one-byte slack write do not exist. No header
+defines it and no makefile in either drop sets it;
+<code>www/experiments/fontpath.js</code> is the console oracle.
+<code>V19-BRANCH.md</code> §10.2 has the analysis.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-what-it-means-for-a-1900-console">4. What it means for a
+19.0.0 console</h2>
 <ul>
-<li><strong>#2–#5 are a series, not four bugs.</strong> 19.0.0 lets a
-SMIL animation set an out-of-range filter parameter <em>and</em> has no
-bounds check where that parameter is used. Either half is enough
-protection in 23.0.1. SVG filters are reachable from any page and SMIL
-is enabled in the applet.</li>
+<li><strong>#5 is the strongest entry, and the only out-of-bounds write
+in the list.</strong> 19.0.0 builds the effect with a valid
+<code>targetOffset</code> and then lets
+<code>primitiveAttributeChanged()</code> mutate it with no range check,
+so a SMIL animation moves the convolution's paint region outside the
+destination buffer. The modelling build writes 44,024 bytes of
+<code>clamp(bias*255)</code> past a 262,144-byte
+<code>PixelBuffer</code> (<code>V19-BRANCH.md</code> §9.4). The bytes
+are page-chosen through <code>bias</code>. SVG filters are reachable
+from any page and SMIL is enabled in the applet.</li>
+<li><strong>#2–#4 are the same series but a much weaker member.</strong>
+The bypass is real — <code>&lt;set to="foo"&gt;</code> leaves
+<code>CHANNEL_UNKNOWN</code>, <code>xChannelIndex()</code> returns −1 —
+but <code>item((size_t)-1)</code> reads one byte <em>before</em> the
+displacement buffer and the value only feeds the loop's bounds-checked
+<code>srcX</code>/<code>srcY</code>. There is no write, and the byte
+sits in allocator metadata at the left edge of the pixel buffer, so it
+is a crash oracle and a size-class nibble at best.
+<code>FEDisplacementMapSoftwareApplier::apply()</code> now returns false
+for it on WKC builds, and
+<code>SVGAnimationEnumerationFunction::setFromAndToValues()</code>
+refuses the value in the first place.</li>
+<li><strong>The console half of this is already measured, on
+23.0.1.</strong> #5 was rejected there (<code>V19-BRANCH.md</code>
+§9.10) because the guard is the engine's own behaviour. That says
+nothing about 19.0.0.</li>
 <li><strong>#6 is the cheapest entry</strong>: one CSS declaration, a
 length check, an out-of-range read past the end of a string buffer.</li>
-<li><strong>Most of the list produces reads.</strong> They enlarge the
-address-leak toolkit rather than handing over a write primitive.</li>
+<li><strong>Outside #5, the list produces reads.</strong> They enlarge
+the address-leak toolkit, which is the current bottleneck on the main
+rig, rather than handing over a write primitive.</li>
 <li><strong>#1 is theoretical on this hardware.</strong> It wants a
-&gt;1 GiB string; the browser runs out of page memory long before
-that.</li>
+&gt;1 GiB string; the console's page heap crashes well before that (8–12
+MB survives, ~14 MB fatal).</li>
 <li><strong>Not reachable from page content</strong>: #27 (inspector),
 #28 (WebDriver service), #21/#22 (need hundreds of millions of
 entries).</li>
@@ -733,6 +815,12 @@ structural.</p>
 (<code>WKC_3.6.8</code> → <code>WKC_3.12.11</code>),
 <code>WebKitLibraries</code> and the legacy 601.7.4 tree were not part
 of this pass.</p>
+<p>Finally, and most importantly for how this list is used: every
+console observation referenced in §4 was made on a
+<strong>23.0.1</strong> unit (<code>V19-BRANCH.md</code> §1.1). Such an
+observation can confirm that 23.0.1 is not affected. It cannot be
+evidence about 19.0.0 in either direction, and three of this list's
+entries have already been misread that way once.</p>
 <h2 id="7-provenance">7. Provenance</h2>
 <table>
 <tbody>
@@ -744,23 +832,18 @@ sha256
 </tr>
 <tr>
 <td>23.0.1 drop</td>
-<td><code>NintendoSwitch2_OpenSources23.0.1.zip</code>, 197,123,071 B,
-sha256
-<code>a2bcdfb7ec695d1ac5c790317a1239ccdb40e0ba8e052891c2ebba1314200f90</code></td>
+<td><code>NintendoSwitch2_OpenSources23.0.1.zip</code>, 197,123,071
+B</td>
 </tr>
 <tr>
 <td>source</td>
 <td><a
-href="https://support.nintendo.com/jp/oss/index.html">https://support.nintendo.com/jp/oss/index.html</a>
-(serves the index only with a browser User-Agent)</td>
+href="https://support.nintendo.com/jp/oss/index.html">https://support.nintendo.com/jp/oss/index.html</a></td>
 </tr>
 <tr>
 <td>artifacts</td>
-<td><a
-href="delta/fork-delta.json"><code>delta/fork-delta.json</code></a>
-(per-file classification), <a
-href="delta/fix-candidates.json"><code>delta/fix-candidates.json</code></a>
-(candidate lines)</td>
+<td><code>oss/ns2-19/fork-delta.json</code> (per-file classification),
+<code>oss/ns2-19/fix-candidates.json</code> (candidate lines)</td>
 </tr>
 </tbody>
 </table>

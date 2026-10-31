@@ -20,8 +20,9 @@ never got.
 | [VM-SETUP.md](VM-SETUP.md) | upstream VM: build, qemu-user run path, test families, gdb, pitfalls, smoke test |
 | [NINTENDO-BUILD.md](NINTENDO-BUILD.md) | vendor build: what the drop contains, the graft, the 11-file build patch, build and tests |
 | [FIX-DELTA.md](FIX-DELTA.md) ([rendered](FIX-DELTA.html)) | source audit: 533 differing files, **29 fixes** in `webkit_3.12.11` (23.0.1) that are absent from `webkit_3.6.8` (19.0.0) |
-| [RESULTS.md](RESULTS.md) | running the 19.0.0-equivalent engine: A/B results for the audited sites on a reverted WebKitGTK 2.40.5, the #15 reclaim, and its read/write primitives on an ASAN-free console-profile tree |
+| [RESULTS.md](RESULTS.md) | running the 19.0.0-equivalent engine: A/B results for the audited sites on a reverted WebKitGTK 2.40.5, the #15 reclaim, its read/write primitives on an ASAN-free console-profile tree, and the console verdicts that close the three testable candidates |
 | [poc/README.md](poc/README.md) | the proof-of-concept pages, the harness, and how to build the three trees |
+| [poc/console-probes/](poc/console-probes/) | the rig experiment modules behind the console verdicts (§9.8–§9.10), as they ran on the 19.0.0 console |
 
 ## Layout
 
@@ -31,10 +32,12 @@ nintendo/     Dockerfile, graft.sh, patches/0001-build-shims.patch,
               upstream/ (613.3.9 cmake/bmalloc/gtest scaffolding), smoke tests
 delta/        compare-forks.py, fix-candidates.py, and their recorded output
               (fork-delta.json, fix-candidates.json)
-poc/          v19 stand-in build script, harness, and the A/B pages
+poc/          v19 stand-in build script, harness, the A/B pages,
+              console-probes/ (rig experiment modules), media/ (captures)
 FIX-DELTA.*   the audit: Markdown source, rendered HTML, pandoc header
 RESULTS.md    §9 of the branch report: build, A/B table, modelling patch,
-              reclaim, read/write primitives, console-profile runs
+              reclaim, read/write primitives, console-profile runs, console
+              verdicts
 ```
 
 The vendor modules (`webkit_3.12.11/{JavaScriptCore,WTF}`) are **not** in this

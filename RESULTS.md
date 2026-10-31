@@ -213,10 +213,14 @@ Three consequences:
   where the console would corrupt; that is a property of our stand-in build
   configuration, not of 19.0.0.
 
-The honest ranking for 19.0.0 is therefore: **#15** (real UAF, page-controlled
-lifetime) first, **#5** (real heap overflow write, attacker-valued bytes)
-second, **#2/#3/#4** a silent one-byte read with no output channel, **#6**
-unreachable.
+The ranking at this point was **#15** first, **#5** second, **#2/#3/#4** a silent
+one-byte read with no output channel, **#6** unreachable. Both top candidates
+are now closed on the shipped binary: §9.9 shows the console's `getContext`
+re-checking `m_context` after the dictionary conversion, so the re-entrant call
+can no longer install the context the outer call drops, and §9.10 shows the
+console revalidating a dynamically invalid `targetY` before the effect sees it.
+#5 remains the correct description of the 613.3.9 source and of the modelling
+builds; it is just not reachable on the target.
 
 ### 9.5 Reclaiming #15's freed object
 
@@ -491,3 +495,212 @@ chunk header on the no-ASAN build. That is the "silent corruption" of §9.4
 becoming visible through glibc's own metadata check rather than through ASAN,
 and it closes the objection that the modelling tree's report was an artifact of
 the stand-in's instrumentation.
+
+### 9.8 The 23.0.1 GetterSetter addrof does not transfer (console verdict)
+
+The 2024 fix behind the GetterSetter addrof
+([`LEAK-HUNT.md` §2](https://github.com/maci0/ns2/blob/main/oss/LEAK-HUNT.md))
+removes a raw-cell read: a `prototype` accessor on a `JSFunction` is read back
+as the `GetterSetter` cell itself, and `Object(cell)` then reinterpret-casts it
+as a `Symbol` whose `description()` hands out a `StringImpl`. Its first step is
+installing that accessor from script, and the 19.0.0 source throws at that
+step (§9.5: `prototype` is `DontEnum | DontDelete`, and
+`JSObject::defineOwnProperty` refuses data→accessor on a non-configurable
+property). The 2026-10-26 console run `webkit-YPHITc` nevertheless reported
+`getterSetterInstalled: true`, which left two possibilities: the console's WKC
+engine deviates, or the old page installed the accessor on something other than
+a real function's `prototype`.
+
+The rig-side probe `www/experiments/protoattr-check.js` settles it. Paths in
+this section are relative to the research tree's `ns2jb-webkit/`; the probe
+sources as they ran on the console are also in
+[`poc/console-probes/`](poc/console-probes/). Nine shapes are built and each
+reports the `prototype` descriptor before/after the install, whether the install
+threw, and whether the next read ran the getter or returned the raw cell. The
+run is `webkit-Sf9fwm`, attempt 856, label `protoattr-1`, 2026-10-31T10:46:52Z,
+on the applet its own User-Agent advertises:
+
+```
+Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/613.0
+ (KHTML, like Gecko) NF/7.0.3.12.11 NintendoBrowser/5.2.0.55481
+```
+
+| case | what it builds | install |
+|---|---|---|
+| `ladder-exact` | the full `addrofProtoFamily` sequence | `TypeError` |
+| `ladder-no-proxy` | same, without parking a Proxy on `Function.prototype` | `TypeError` |
+| `field-single` | the class-field `this.prototype = {}` store | `TypeError` |
+| `assign-plain` | `f.prototype = {}` then `__defineGetter__` | `TypeError` |
+| `assign-proxy` | same with a Proxy target | `TypeError` |
+| `defineproperty-fresh` | `Object.defineProperty(f, 'prototype', {get})` | `TypeError` |
+| `read-then-install` | one `f.prototype` read before the install | `TypeError` |
+| `class-ctor` | a class constructor as the target | `TypeError` |
+| `arrow-plain` | arrow function (no own `prototype`) — control | `ok` |
+
+`accepted: 1`, `bypass: 0`. The single acceptance is the control: an arrow
+function has no own `prototype`, so `__defineGetter__` creates a brand-new
+`configurable: true` accessor on a plain property and the read runs the getter
+(`42`). Every case that touches the lazy `prototype` of a real function throws
+the same `TypeError: Attempting to change configurable attribute of
+unconfigurable property.` that both host trees throw.
+
+So the 19.0.0 engine is behaviourally identical to upstream 2.40.5 along the
+whole addrof chain, and the 10-26 `getterSetterInstalled: true` was a
+measurement of a different (unrecoverable, pre-ladder) page — and even in that
+run the follow-up read was garbage (`headerIntact: false`, `copied: false`), not
+an address. The conclusion for the leak hunt is negative but clean: the 23.0.1
+GetterSetter addrof is not an entrypoint on this target, and no amount of shape
+tuning in `addrofProtoFamily` will change that. The remaining route is the one
+§9.6 already isolates — reclaim the freed 584-byte chunk with an allocation
+whose own fields are pointers — or a non-randomised peer heap, which only the
+rig can decide.
+
+### 9.9 #15 is guarded in the shipped engine (console verdict)
+
+§9.6 ends with the page holding a wrapper for a freed 584-byte context and
+choosing its bytes. On the console that chain does not start: the re-entrant
+`getContext()` leaves no stale object behind. The runs below are
+`webkit-Sf9fwm`, 2026-10-31 10:52–11:13Z, page
+`www/experiments/uaf584.js` (attempts 857–864) and its two follow-ups
+`oc584.js`/`gl584.js` (865–866).
+
+| # | label | probe | result |
+|---|---|---|---|
+| 857 | `uaf584-1` | `op=none`, 64 × 584 spray | survived, `stale:true` |
+| 858 | `uaf584-2` | + identity of the outer result | survived, `stale:true`, `outerSame:true` |
+| 859 | `uaf584-3` | `op=canvas`, marker-filled spray | survived, `out:"width=64"` — no marker reached the object |
+| 860 | `uaf584-4` | inner context marked (`lineWidth 7.25`, `fillStyle #123456`), read back after the trigger | `stateAfter:"lw=7.25 fs=#123456"` — no destructor ran |
+| 861 | `uaf584-order` | live context present, count getter firings | `fired:0` — the entry check returns before any conversion |
+| 862 | `uaf584-attrs` | getter returns `desynchronized:true` | `outer:{"desynchronized":false}` — the outer call returned the inner context |
+| 863 | `uaf584-attrs-control` | same, no re-entry | `no-op` — the probe skipped itself when there was no inner context |
+| 864 | `uaf584-attrs-control-2` | same, fixed probe | `outer:{"desynchronized":true}` — the read path is sound |
+| 865 | `oc584-1` | `OffscreenCanvas` reentrancy | `hasCtor:false` — not in this engine |
+| 866 | `gl584-1` | WebGL reentrancy | `webgl unavailable` |
+
+Each row has a single reading, and together they close the route:
+
+* **The object is never released.** A `CanvasRenderingContext2D` destructor
+  resets its state stack, so `lineWidth`/`fillStyle` written to the inner
+  context before the outer call returned would read back `1`/`#000000`. They
+  read back `7.25`/`#123456` (860). Nothing was freed, so the 584-byte spray
+  (859) had nothing to win.
+* **The outer call returns the inner context.** `outerSame` and `cachedSame`
+  are both true, and `canvas.getContext('2d')` after the trigger is the same
+  object: `m_context` is still the one the getter installed.
+* **It also ignores the outer settings.** The 862 run asked for
+  `desynchronized:true`; the returned context reports `false`, which is the
+  inner context's value (built from an empty dictionary). 864 is the control
+  for that read: on the ordinary path the same getter makes the context report
+  `true`.
+* **The conversion really is in C++.** 861 puts a live context on the canvas
+  first, so the entry check returns before any conversion can run, and the
+  getter does not fire (`fired:0`). So the engine does see the returned
+  options dictionary — and then re-checks `m_context` after converting it.
+
+That last point is where the shipped binary and the published source part ways.
+The 19.0.0 drop (`webkit_3.6.8/WebCore/html/HTMLCanvasElement.cpp:297–307`)
+converts the dictionary and calls `createContext2d()` unconditionally; that
+function contains only `ASSERT(!m_context)` and then
+`m_context = CanvasRenderingContext2D::create(...)`, so on the published code
+the outer call must allocate a second context and release the inner one —
+exactly the `same=false` + ASAN use-after-free that 2.40.5 reproduces (§9.2).
+The console behaves like the *fixed* engine instead: a context installed by the
+getter is returned verbatim and survives. Behaviourally the binary carries the
+`040ef6e21ffa` re-check ("Crash in CanvasRenderingContext::deref after
+reentrant getContext()", bug 313175) that the 23.0.1 delta attributes to
+23.0.1.
+
+Two practical consequences:
+
+1. **#15 is not an entrypoint on this target.** The wrapper-free primitive of
+   §9.6 ("arbitrary 8-byte read and write given an address") needs a freed
+   context; there is none. The 584-byte reclaim, the fake `State` and the
+   `lineWidthLiveRW` path remain correct descriptions of the *class*, and they
+   are what the host tree exercises — but they cannot be reached here.
+2. **The published drop is not sufficient to model this engine.** For this
+   function it is missing a security fix the console has. Treat every
+   "the drop says X" conclusion in this branch as a hypothesis until a console
+   run supports it; the fix delta of [`FIX-DELTA.md`](FIX-DELTA.md) measures the
+   *source* difference between 19.0.0 and 23.0.1, not necessarily the shipped
+   difference.
+
+The remaining entrypoint with the page controlling the access and the bytes is
+**#5** (§9.4, §9.7): `feConvolveMatrix` with an invalid `targetY` writes 44,024
+bytes of `clamp(bias*255)` past a 262,144-byte `PixelBuffer`, and the console's
+build has no assertion at that write site. Nothing in this section touches it.
+
+### 9.10 #5 is revalidated in the shipped engine (console verdict)
+
+§9.4 and §9.7 leave `feConvolveMatrix` as the only entrypoint where the page
+controls both the access and the written bytes: the 19.0.0 drop validates
+`targetX`/`targetY` when the effect is built and never again, so an out-of-range
+value set *after* the first paint reaches the software applier, which writes
+44,024 bytes past the destination pixel buffer. On the console it does not. The
+runs below are `webkit-Sf9fwm`, 2026-10-31 11:15–11:25Z, page
+`www/experiments/feconv.js` (867) and `feconv-look.js` (868–871).
+
+| # | label | probe | result |
+|---|---|---|---|
+| 867 | `feconv-1` | 256×256 filter, `targetY` 1→45 after the first paint, 24 × 256 KiB zero-filled spray, scan for the bias byte | survived; `targetAfter:45`, 2 repaints, `hits:0` of 24 |
+| 868 | `feconv-look-1` | two 256×256 filters side by side, right one armed 1→45 | left square flat filter output; the armed square is gone |
+| 869 | `feconv-look-2` | same, armed 1→3, one past the valid range | armed square gone as well |
+| 870 | `feconv-look-3` | same, 10 s between the first paint and the arm | both squares render for the whole 10 s; the armed one disappears in the first frame after the set |
+| 871 | `feconv-look-4` | control: arm 1→2, still valid | both squares keep rendering for the whole run |
+
+The captures are [poc/media/feconv-look-870-before.jpg](poc/media/feconv-look-870-before.jpg)
+(before the arm), [poc/media/feconv-look-870-armed.jpg](poc/media/feconv-look-870-armed.jpg)
+(after it) and [poc/media/feconv-look-871-control.jpg](poc/media/feconv-look-871-control.jpg)
+(the valid-offset control).
+
+Three readings:
+
+* **The applier runs on this engine.** With an all-zero kernel and
+  `bias="0.9"`, a working filter renders a flat bright square; both squares do
+  that at 1280×720 before the arm. A filter that failed to build would leave
+  the rect's own `#123456` visible instead.
+* **The invalid offset is not applied.** Armed to 3, the square disappears
+  instead of shifting: the interior rows are written at
+  `(targetY + clipBottom − stride)·width·4`, so an applied offset would put a
+  bright band near the bottom of the square (§9.4 geometry), and rows 0..2
+  would be rewritten by `setOuterPixels`. Nothing of the element is painted.
+* **The control rules out the arming code path.** With `targetY=2` the same
+  `baseVal` setter and the same forced repaints keep the square rendering, so
+  the disappearance is specific to the out-of-range value, not to touching
+  `targetY` after the build.
+
+That is the 2.54.2 (all fixes) column of §9.2 — "accepted by the setter, filter
+dropped by the `svgAttributeChanged` revalidation, clean exit" — and not what
+the 19.0.0 source does: `SVGFEConvolveMatrixElement::svgAttributeChanged`
+(`WebCore/svg/SVGFEConvolveMatrixElement.cpp:177`) hands `targetX`/`targetY`
+straight to `primitiveAttributeChanged()`, which mutates the existing effect
+through `setFilterEffectAttribute()` with no range check. The console validates
+first, the same way it re-checks `m_context` in §9.9. The 23.0.1 delta
+attributes this check (`3cfb6575ec08`) to a `#if PLATFORM(WKC)` block, which is
+consistent with a vendor backport that the published 19.0.0 source predates.
+
+#### What this changes
+
+Three of the delta's fixes can be tested directly from the page, and all three
+are present in the shipped binary although absent from the published source:
+
+| fix | site | console verdict |
+|---|---|---|
+| `040ef6e21ffa` | `HTMLCanvasElement::getContext` re-checks `m_context` | guarded (§9.9) |
+| `3cfb6575ec08` | `SVGFEConvolveMatrixElement::svgAttributeChanged` range check | guarded (§9.10) |
+| GetterSetter `prototype` hardening | `JSObject::defineOwnProperty` refuses the data→accessor conversion | `TypeError` (§9.8) |
+
+`Version.xcconfig` in the drop says 613.3.9 and the applet reports
+`AppleWebKit/613.0`, so the branch is right — the binary is 613.3.9 **plus
+security fixes backported from later releases**.
+[`FIX-DELTA.md`](FIX-DELTA.md) measures the source distance between the 19.0.0
+snapshot and 23.0.1; it is not a list of bugs the console still has. Every
+remaining candidate from that delta is now a hypothesis to be *disconfirmed*,
+and the score so far is 0 of 3.
+
+The search therefore has to move to code Nintendo owns: `WKC_3.6.8`, the
+`*/WKC/` directories, the platform layer and the bindings that only exist in
+this fork. Upstream fixes are precisely what a vendor backports; fork-specific
+code is precisely what no upstream fix will ever cover. Candidates from 613.3.9
+that 23.0.1's delta does not cover are the second pool. What is *not* worth more
+console time is the rest of the 29-fix list, one fix at a time, until something
+in that list is shown to be reachable.

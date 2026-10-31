@@ -541,3 +541,15 @@ not an entrypoint.
 
 Full write-up, including the macro-level reason the stand-in needs a modelling
 patch, is in [`../RESULTS.md`](../RESULTS.md) §9.
+
+### What the console itself does
+
+The table above describes the stand-in. The same triggers were then run on the
+actual 19.0.0 console through the rig, and the shipped binary does not match the
+published source at any of the three testable sites: a re-entrant `getContext`
+keeps its inner context (`040ef6e21ffa`), a dynamically invalid `targetY` never
+reaches the applier (`3cfb6575ec08`), and the GetterSetter `prototype` install
+throws. Those probes — rig experiment modules rather than standalone pages —
+are in [`console-probes/`](console-probes/); the verdicts are in
+[`../RESULTS.md`](../RESULTS.md) §9.8–§9.10, with screen captures in
+[`media/`](media/).

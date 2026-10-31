@@ -727,12 +727,16 @@ parser itself is in the closed part of the app.</td>
 <code>WKC/…/ComplexTextControllerWKC.cpp</code></td>
 <td>whole files behind <code>#if defined(WKC_PROP_USE_LIBFONT)</code> in
 23.0.1 (50 occurrences of the flag, 0 in 19.0.0, where the files are
-unconditional). If the flag is undefined on the console, the
-emoji-cluster <code>uncheckedAppend</code> lead and the
-<code>fixedU16Text</code> one-byte slack write do not exist. No header
-defines it and no makefile in either drop sets it;
-<code>www/experiments/fontpath.js</code> is the console oracle.
-<code>V19-BRANCH.md</code> §10.2 has the analysis.</td>
+unconditional). No header defines it and no makefile in either drop sets
+it, so the console was asked: <code>fontpath-1</code> measures U+FFFF
+equal to a space on the complex path and 32 px on the simple path, which
+is the flag being <strong>defined</strong> — the libfont layer is live
+code. Both leads it guards were then settled by measurement and by the
+allocator: the emoji-cluster peer never returns a length greater than
+the one it was given (§10.2,
+<code>emojiclamp</code>/<code>emojiclamp2</code>), and the
+<code>fixedU16Text</code> terminator write lands in allocator padding.
+<code>V19-BRANCH.md</code> §10.2 has both arguments.</td>
 </tr>
 </tbody>
 </table>

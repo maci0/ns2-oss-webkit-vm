@@ -1,6 +1,7 @@
 # Console probes
 
-The probes behind RESULTS.md §9.8–§9.10, exactly as they ran on the console.
+The probes behind RESULTS.md §9.8–§9.10 and §10.2 of the branch audit, exactly
+as they ran on the console.
 They are not standalone pages: each one is an experiment module for the rig's
 page harness (`ns2jb-webkit/`), registered with
 `Ns2Webkit.registerExperiment({name, description, run})`. The harness supplies
@@ -25,6 +26,9 @@ node tools/experiment.mjs enqueue feconv --args '{"targetY":45,"bias":144}'
 | `gl584.js` | is there a WebGL branch? | `webgl unavailable` | §9.9 |
 | `feconv.js` | does an out-of-range `targetY` set after the build reach the applier (write overflow, #5)? | survived, `hits:0` over 24 × 256 KiB of page memory | §9.10 |
 | `feconv-look.js` | same trigger, read off the screen instead of the heap | armed square stops painting; valid control keeps painting | §9.10 |
+| `fontpath.js` | is the WKC font layer compiled in (`WKC_PROP_USE_LIBFONT`)? | U+FFFF measures as a space on the complex path and as a 32 px box on the simple path: the flag is defined, the libfont layer is live | §10.2 |
+| `emojiclamp.js` | does the closed emoji peer over-report its cluster length (heap overflow in `ComplexTextControllerWKC`)? | survived all eleven tails; no width exceeded the text | §10.2 |
+| `emojiclamp2.js` | why did three tails measure zero width — peer, or lost text? | position-independent zeroing, DOM intact, line box present: the peer consumes the run, clamping to the length it was given | §10.2 |
 
 `feconv-look.js` is the pattern for a visual oracle: two identical filtered
 squares side by side, the reference left untouched, `armDelay` between the
